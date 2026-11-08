@@ -38,6 +38,7 @@
 !/parrot-home/skills/blackhat-ops
 /parrot-home/skills/blackhat-ops/*
 !/parrot-home/skills/blackhat-ops/SKILL.md
+!/parrot-home/skills/osint/SKILL.md
 !/tools
 /tools/*
 !/tools/capture-grants.sh
