@@ -12,8 +12,13 @@ import { homedir as osHomedir } from "node:os"; // symiparrot#3
 
 //#region symiparrot#3: durable client-grant snapshot (process-local registry survives restarts)
 var PARROT_GRANTS_FILE = ".symi-parrot-dynamic-grants.json";
+function parrotGrantsHome() { // symiparrot#4 A1: honor relocated homes
+	const override = process.env.SYMI_PARROT_HOME;
+	const base = typeof override === "string" && override.trim().length > 0 ? override : pathJoin(osHomedir(), ".symi-jai-parrot");
+	return base;
+}
 function parrotGrantsPath() {
-	try { return pathJoin(osHomedir(), ".symi-jai-parrot", PARROT_GRANTS_FILE); } catch { return void 0; }
+	try { return pathJoin(parrotGrantsHome(), PARROT_GRANTS_FILE); } catch { return void 0; }
 }
 function parrotSerializePlugins(plugins) {
 	const out = [];
@@ -31,17 +36,35 @@ function parrotSerializePlugins(plugins) {
 	}
 	return out;
 }
+var parrotSaveChain = Promise.resolve(); // symiparrot#4 A2: single-flight, latest-wins
+var parrotSaveQueued = false;
+var parrotSavePlugins = undefined;
 function parrotScheduleSave(plugins) {
 	const path = parrotGrantsPath();
 	if (path === void 0) return;
-	const payload = JSON.stringify({ schema: 1, savedAt: Date.now(), plugins: parrotSerializePlugins(plugins) });
-	queueMicrotask(async () => {
-		try {
-			await mkdir(pathJoin(path, ".."), { recursive: true, mode: 448 });
-			const tmp = `${path}.${process.pid}.tmp`;
-			await writeFile(tmp, payload);
-			await rename(tmp, path);
-		} catch {}
+	parrotSavePlugins = plugins; // latest registry state always wins
+	if (parrotSaveQueued) return;
+	parrotSaveQueued = true;
+	parrotSaveChain = parrotSaveChain.then(async () => {
+		parrotSaveQueued = false;
+		const snapshot = parrotSavePlugins;
+		parrotSavePlugins = undefined;
+		if (snapshot === undefined) return;
+		const payload = JSON.stringify({ schema: 1, savedAt: Date.now(), plugins: parrotSerializePlugins(snapshot) });
+		for (let attempt = 0; attempt < 2; attempt++) {
+			const tmp = `${path}.${process.pid}.${attempt}.tmp`;
+			try {
+				await mkdir(pathJoin(path, ".."), { recursive: true, mode: 448 });
+				await writeFile(tmp, payload);
+				await rename(tmp, path);
+				return;
+			} catch (error) {
+				if (attempt > 0) return; // best-effort: stock behavior on failure
+				await new Promise((resolve) => setTimeout(resolve, 50)); // backoff once, then retry
+			}
+		}
+	}).catch(() => {
+		parrotSaveQueued = false; // allow a later save to retry after a chain failure
 	});
 }
 async function parrotLoadSnapshot() {
