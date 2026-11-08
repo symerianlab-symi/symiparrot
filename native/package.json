@@ -1,0 +1,14 @@
+{
+ "name": "@symerian/symi-parrot",
+ "version": "2026.12.87-parrot.1",
+ "private": true,
+ "description": "Symi distribution of the Jai Host and Web UI",
+ "license": "MIT",
+ "bin": {
+  "symi": "symi.mjs"
+ },
+ "type": "module",
+ "engines": {
+  "node": "^22.19.0 || >=24.0.0"
+ }
+}

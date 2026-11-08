@@ -1,0 +1,23 @@
+{
+ "protocol_version": 1,
+ "author": "codex",
+ "updated": "2026-10-23T04:57:19.940Z",
+ "platform": {
+  "os": "linux",
+  "arch": "x64",
+  "nodeMajor": 22
+ },
+ "upstreamCommit": "3faffd8056eeb7053514a3c3b1aca7b3c65ec35c",
+ "upstreamTree": "35e67e3fa4fc2d96f79c6dbff955a1a6d8a4b3e7",
+ "lockSha256": "5a01b9e8dfafde131b91c8282995eb475e2ad076b75ce3660d81eacc8a617c97",
+ "sourceRoot": "runtime",
+ "entry": "./runtime/apps/cli/lib/bin.js",
+ "runtimePackage": "runtime/apps/cli",
+ "product": {
+  "name": "@symerian/symi-parrot",
+  "version": "2026.12.87-parrot.1",
+  "bin": "symiparrot"
+ },
+ "phase": "native-product",
+ "fork": "symiparrot"
+}

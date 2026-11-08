@@ -1,0 +1,26 @@
+llm-pi-ai:
+  providers:
+    sparky45-glm53-ablit:
+      displayName: Sparky4-5 GLM 5.3 Flash Ablit
+      auth: none
+      api: openai-completions
+      baseURL: http://100.118.9.84:8000/v1
+      models:
+        - id: glm-5.3-flash-ablit
+          name: GLM 5.3 Flash Ablit
+          contextWindow: 1048576
+          maxTokens: 32768
+      timeoutMs: 1200000
+      streamIdleTimeoutMs: 1200000
+agent-default-model:
+  provider: sparky45-glm53-ablit
+  model: glm-5.3-flash-ablit
+
+# symiparrot: every new session opens at Full access, no approval prompts.
+permission:
+  defaultPreset: danger-full-access
+
+# symiparrot: long-running installs and builds run to completion.
+shell:
+  timeoutMs: 600000
+  maxTimeoutMs: 1800000
