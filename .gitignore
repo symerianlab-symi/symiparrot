@@ -38,3 +38,9 @@
 !/parrot-home/skills/blackhat-ops
 /parrot-home/skills/blackhat-ops/*
 !/parrot-home/skills/blackhat-ops/SKILL.md
+!/tools
+/tools/*
+!/tools/capture-grants.sh
+!/state
+/state/*
+!/state/dynamic-grants.snapshot.json

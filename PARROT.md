@@ -43,3 +43,11 @@ Branch `symi-parrot`. Fork of stock `@symerian/symi` 2026.12.87
   (`EXA_API_KEY` / `PERPLEXITY_API_KEY` / `JAI_API_KEY`) to light search
 - Live recon channel NOW: `gh` CLI authenticated (5k req/h GitHub search/API)
 - Empty-string values are rejected by the parser — comment out, never leave `""`
+
+## Runtime grant state (C4)
+Live grants: `~/.symi-jai-parrot/.symi-parrot-dynamic-grants.json` — runtime-mutable,
+NOT tracked verbatim. Capture point-in-time: `tools/capture-grants.sh` → `state/`.
+Rebuild-from-nothing: define any client plugin once; the runner recreates and
+resaves the snapshot on every mutation (parrot#3). Restore a capture:
+`cp state/dynamic-grants.snapshot.json ~/.symi-jai-parrot/.symi-parrot-dynamic-grants.json`
+then restart the host (restore runs at constructor, validated).
