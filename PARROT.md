@@ -35,3 +35,11 @@ Branch `symi-parrot`. Fork of stock `@symerian/symi` 2026.12.87
 - one agent per home at a time (owner lock); headless bundle has its OWN persona
   and does not load agent presets — use web/cli sessions for preset proofs
 - `symiparrot --profile headless "<task>"` = one-shot verification vehicle
+
+## Credentials & keys (C1–C3 closure)
+- `parrot-home/.credentials.yaml` — layer-2 store, schema-valid (parser-proven),
+  hot-reloaded; currently zero entries = search providers degrade with teaching errors
+- `parrot-home/env` — layer-1 env file, sourced by the launcher; drop keys here
+  (`EXA_API_KEY` / `PERPLEXITY_API_KEY` / `JAI_API_KEY`) to light search
+- Live recon channel NOW: `gh` CLI authenticated (5k req/h GitHub search/API)
+- Empty-string values are rejected by the parser — comment out, never leave `""`
