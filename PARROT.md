@@ -51,3 +51,10 @@ Rebuild-from-nothing: define any client plugin once; the runner recreates and
 resaves the snapshot on every mutation (parrot#3). Restore a capture:
 `cp state/dynamic-grants.snapshot.json ~/.symi-jai-parrot/.symi-parrot-dynamic-grants.json`
 then restart the host (restore runs at constructor, validated).
+
+## OSINT toolchain (part 2)
+- System: sherlock recon-ng theHarvester dnsenum dmitry exiftool fierce photon whatweb wafw00f amass maltego - all verified running
+- `~/.venvs/osint/` (py3.13 venv): holehe maigret exifread phonenumbers lxml6 + spiderfoot deps
+- `/home/ghost/tools/spiderfoot` (git clone) + `/usr/local/bin/spiderfoot` wrapper; 200+ modules (`spiderfoot -M`)
+- lxml note: py3.13 needs >=5 wheels; spiderfoot req pinned <5 (source-build ABI break) - relaxed in-place
+- Live-fire validated: sherlock 400+ sites, holehe provider hits, maigret alt-IDs, amass passive 156 subds (vs crtsh 70), GDELT news API keyless
