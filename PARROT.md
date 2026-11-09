@@ -67,3 +67,9 @@ then restart the host (restore runs at constructor, validated).
 - SAVE / DELETE (localStorage `osint-dark-saves-v1`) / RE-RUN: wrong-person | deeper | darkweb
 - Engine: browser-side passive keyless chain — GitHub users→repos→commit-emails, crt.sh CT,
   gravatar hash+avatar, archive.org CDX; seeded cache renders on first load
+
+## Access & ops (C4b)
+- Laptop URL: https://ghost.taild6f361.ts.net/osint/  (tailscale serve path -> 127.0.0.1:18790)
+- Persistent: ~/.config/systemd/user/osint-dark.service (enabled, Restart=on-failure)
+- `onsint` (/usr/local/bin): idempotent starter+health-check, prints the laptop URL
+- SSH from laptop: ssh ghost; run `onsint` any time - service and tailnet path self-heal

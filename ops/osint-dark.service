@@ -1,0 +1,12 @@
+[Unit]
+Description=OSINT DARK static app (symiparrot)
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/SYMI-WS/osint-dark
+ExecStart=/usr/bin/python3 -m http.server 18790 --bind 127.0.0.1
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

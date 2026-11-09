@@ -1,0 +1,33 @@
+#!/bin/sh
+# onsint - OSINT DARK launcher: ensures service + tailnet path, prints access URL
+set -u
+HOSTBIN=$(command -v tailscale || echo /usr/bin/tailscale)
+BASE="https://ghost.taild6f361.ts.net/osint/"
+
+# 1. app service (user unit, idempotent)
+systemctl --user enable --now osint-dark.service 2>/dev/null
+for i in 1 2 3 4 5; do
+  curl -sf -o /dev/null http://127.0.0.1:18790/index.html && break
+  sleep 1
+done
+
+# 2. tailnet serve path (idempotent; sudo only if needed)
+if ! $HOSTBIN serve status 2>/dev/null | grep -q "/osint/"; then
+  if [ "$(id -u)" = "0" ] || sudo -n true 2>/dev/null; then
+    sudo -n $HOSTBIN serve --bg --set-path=/osint/ http://127.0.0.1:18790 >/dev/null 2>&1 || \
+    $HOSTBIN serve --bg --set-path=/osint/ http://127.0.0.1:18790 >/dev/null 2>&1
+  fi
+fi
+
+# 3. health + report
+if curl -sf -o /dev/null http://127.0.0.1:18790/index.html && curl -sf -o /dev/null "$BASE"; then
+  echo "==================================================="
+  echo " OSINT DARK is up."
+  echo " Laptop URL : $BASE"
+  echo " Local      : http://127.0.0.1:18790/index.html"
+  echo " service    : service: systemd --user osint-dark (enabled at boot) | logs: journal --user -u osint-dark"
+  echo "==================================================="
+else
+  echo "onsint: not healthy - check 'journal --user -u osint-dark' and 'tailscale serve status'"
+  exit 1
+fi
