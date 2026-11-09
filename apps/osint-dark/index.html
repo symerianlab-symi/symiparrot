@@ -6,9 +6,10 @@
 <title>OSINT DARK — Agent Profile System v2</title>
 <style>
 :root{
-  --bg:#141414; --panel:#1c1c1c; --panel2:#232323; --line:#2e2e2e; --line2:#3a3a3a;
-  --txt:#c9c9c9; --dim:#8b8b8b; --faint:#5c5c5c;
-  --acc:#82b8de; --acc2:#4f81a5; --ok:#82c995; --warn:#d9bb72; --bad:#d98a8a; --sel:#2a3f50;
+  --bg:#0a0a0c; --panel:#101013; --panel2:#15151a; --line:#222228; --line2:#2e2e36;
+  --txt:#c6c6c6; --dim:#83838a; --faint:#55555c;
+  --acc:#e5484d; --acc2:#a83a3e; --ok:#6fbf8a; --warn:#d3a94f; --bad:#e5484d; --sel:#241417;
+  --redline:#e5484d; --redglow:#rgba(229,72,77,.35);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -29,8 +30,8 @@ input:focus,select:focus,textarea:focus{outline:1px solid var(--acc2);border-col
 #subject{min-width:300px}
 button{background:#1a1a1a;color:var(--txt);border:1px solid var(--line2);padding:5px 13px;font:inherit;font-size:12px;cursor:pointer;border-radius:2px}
 button:hover{border-color:var(--acc);color:#fff;background:#202020}
-button.primary{border-color:#3a5a74;color:var(--acc)}
-button.primary:hover{background:#16222c}
+button.primary{border-color:#5c2020;color:var(--acc)}
+button.primary:hover{background:#201414}
 button:disabled{opacity:.45;cursor:default}
 
 /* layout */
@@ -40,7 +41,7 @@ nav .navhead{padding:8px 12px;font-size:10px;letter-spacing:2px;color:var(--fain
 #sessions{flex:1;overflow-y:auto}
 .ses{padding:7px 12px;border-bottom:1px solid #202020;cursor:pointer;font-size:12px}
 .ses:hover{background:#1f1f1f}
-.ses.active{background:var(--sel);border-left:2px solid var(--acc)}
+.ses.active{background:#171114;border-left:2px solid var(--acc)}
 .ses .t{color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ses .s{color:var(--faint);font-size:10px;margin-top:1px}
 .navfoot{padding:8px;border-top:1px solid var(--line);display:grid;gap:5px}
@@ -48,18 +49,30 @@ nav .navhead{padding:8px 12px;font-size:10px;letter-spacing:2px;color:var(--fain
 
 main{overflow-y:auto;padding:14px 18px;min-width:0}
 .card{background:var(--panel);border:1px solid var(--line);padding:12px 14px;margin-bottom:14px}
-.card h2{font-size:10px;letter-spacing:2.5px;color:var(--acc2);border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:10px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.card h2{font-size:10px;letter-spacing:2.5px;color:var(--acc);border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:10px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
 .card h2 .cnt{color:var(--faint);letter-spacing:0}
 
 /* candidates */
 .cand{display:flex;gap:10px;padding:8px;border:1px solid var(--line);margin-bottom:6px;background:#191919;align-items:flex-start}
 .cand:hover{border-color:var(--line2)}
-.cand.pick{border-color:var(--acc);background:var(--sel)}
+.cand.pick{border-color:var(--acc);background:#171012;box-shadow:0 0 0 1px #3a1a1c}
 .cand img{width:44px;height:44px;border:1px solid var(--line);background:#0e0e0e}
 .cand .body{flex:1;min-width:0}
 .cand .nm{color:#e6e6e6;font-size:13px}
 .cand .meta{color:var(--dim);font-size:11px;margin-top:1px}
-.cand .code{font-size:16px;color:var(--acc);border:1px solid #2e4a5c;background:#12202b;padding:2px 8px;letter-spacing:1px}
+
+/* ghost identity mark */
+#ghost{display:none;flex-direction:column;align-items:center;padding:70px 0 30px}
+#bootghost #ghost{display:flex}
+#ghost svg{drop-shadow(0 0 14px rgba(229,72,77,.45))}
+#ghost .gname{margin-top:14px;font-size:18px;letter-spacing:8px;color:#dedede;font-weight:600}
+#ghost .gsub{margin-top:4px;font-size:10px;letter-spacing:3px;color:var(--faint)}
+.redline{width:340px;height:1px;background:linear-gradient(90deg,transparent,var(--redline),transparent);margin-top:18px;position:relative;overflow:visible}
+.redline::after{content:'';position:absolute;top:-2px;left:0;width:56px;height:5px;border-radius:3px;background:var(--redline);box-shadow:0 0 12px 2px rgba(229,72,77,.55);animation:sweep 2.6s cubic-bezier(.45,.05,.55,.95) infinite}
+@keyframes sweep{0%{left:-60px}55%{left:344px}100%{left:-60px}}
+@keyframes ghostpulse{0%,100%{opacity:.85}50%{opacity:1}}
+#ghost svg path{animation:ghostpulse 3.2s ease-in-out infinite}
+.cand .code{font-size:16px;color:var(--acc);border:1px solid #4a2024;background:#1c1114;padding:2px 8px;letter-spacing:1px;font-weight:700}
 .cand .score{color:var(--warn);font-size:10px;margin-left:6px}
 #hints textarea{width:100%;min-height:44px;resize:vertical}
 .hrow{display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;margin-bottom:5px;font-size:11px;color:var(--dim)}
@@ -81,15 +94,15 @@ a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
 /* telemetry bars */
 .trow{display:grid;grid-template-columns:110px 1fr 70px;gap:8px;align-items:center;font-size:11px;margin-bottom:4px;color:var(--dim)}
 .bar{height:5px;background:#101010;border:1px solid #222}
-.bar i{display:block;height:100%;background:var(--acc2)}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc))}
 #netlog{font-size:10px;color:#6a6a6a;max-height:110px;overflow-y:auto;margin-top:6px;border-top:1px dashed #222;padding-top:5px}
 #netlog div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #netlog b{color:#9a9a9a;font-weight:400}
 
 footer{border-top:1px solid var(--line);padding:6px 16px;color:#4e4e4e;font-size:10px;display:flex;gap:14px}
-.flash{position:fixed;bottom:16px;right:16px;background:#202020;border:1px solid var(--acc);color:var(--acc);padding:8px 16px;font-size:12px;display:none;z-index:9}
+.flash{position:fixed;bottom:16px;right:16px;background:#151012;border:1px solid var(--acc);color:var(--acc);padding:8px 16px;font-size:12px;display:none;z-index:9;box-shadow:0 0 18px #3a1416}
 #empty{color:var(--faint);padding:60px 20px;text-align:center;border:1px dashed var(--line);margin:20px}
-code.codechip{color:var(--acc);background:#12202b;padding:0 5px;border:1px solid #2e4a5c}
+code.codechip{color:var(--acc);background:#1c1114;padding:0 5px;border:1px solid #4a2024}
 </style>
 </head>
 <body>
@@ -118,7 +131,16 @@ code.codechip{color:var(--acc);background:#12202b;padding:0 5px;border:1px solid
   </nav>
 
   <main id="main">
-    <div id="empty">NO SESSION — enter a subject and FIND PEOPLE</div>
+    <div id="bootghost"><div id="ghost">
+  <svg width="120" height="120" viewBox="0 0 64 64" fill="none">
+    <path d="M32 6C20 6 12 15 12 27v23c0 2 2.5 3 4 1.6L20 47l4 4.4c1.4 1.5 3.6 1.5 5 0L32 47l3 4.4c1.4 1.5 3.6 1.5 5 0l4-4.4 4 4.6c1.5 1.4 4 .4 4-1.6V27C52 15 44 6 32 6z" stroke="#e5484d" stroke-width="2.2" fill="rgba(229,72,77,.06)"/>
+    <circle cx="24" cy="28" r="2.4" fill="#e5484d"/><circle cx="40" cy="28" r="2.4" fill="#e5484d"/>
+    <path d="M26 36c2 1.8 4 2.6 6 2.6s4-.8 6-2.6" stroke="#e5484d" stroke-width="1.6" stroke-linecap="round"/>
+  </svg>
+  <div class="gname">DARK OSINT GHOST</div>
+  <div class="gsub">PASSIVE COLLECTION // AWAITING TARGET</div>
+  <div class="redline"></div>
+</div><div id="empty" style="border:none">ENTER A SUBJECT — FIND PEOPLE</div></div>
   </main>
 </div>
 
@@ -132,6 +154,14 @@ const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 const LS='osint-dark-v2';
 const now=()=>new Date().toISOString().replace('T',' ').slice(0,16)+'Z';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const GHOST_NEW=`<div id="ghost">
+  <svg width="120" height="120" viewBox="0 0 64 64" fill="none">
+    <path d="M32 6C20 6 12 15 12 27v23c0 2 2.5 3 4 1.6L20 47l4 4.4c1.4 1.5 3.6 1.5 5 0L32 47l3 4.4c1.4 1.5 3.6 1.5 5 0l4-4.4 4 4.6c1.5 1.4 4 .4 4-1.6V27C52 15 44 6 32 6z" stroke="#e5484d" stroke-width="2.2" fill="rgba(229,72,77,.06)"/>
+    <circle cx="24" cy="28" r="2.4" fill="#e5484d"/><circle cx="40" cy="28" r="2.4" fill="#e5484d"/>
+    <path d="M26 36c2 1.8 4 2.6 6 2.6s4-.8 6-2.6" stroke="#e5484d" stroke-width="1.6" stroke-linecap="round"/>
+  </svg>
+  <div class="gname">DARK OSINT GHOST</div><div class="gsub">PASSIVE COLLECTION // AWAITING TARGET</div>
+  <div class="redline"></div></div><div id="empty" style="border:none">NEW SESSION — FIND PEOPLE</div>`;
 const flash=m=>{const f=$('#flash');f.textContent=m;f.style.display='block;';f.style.display='block';setTimeout(()=>f.style.display='none',2200)};
 $('#datestamp').textContent=now();setInterval(()=>$('#datestamp').textContent=now(),30000);
 
@@ -200,7 +230,8 @@ async function findCandidates(subject,depth){
 async function deepDive(handle){
   NET.n=0;NET.hits=0;NET.t0=Date.now();NET.log=[];
   const p=await gh('/users/'+handle);
-  const repos=await gh(`/users/${handle}/repos?sort=pushed&per_page=10`);
+  const orgs=await ghTry(`/users/${handle}/orgs`)||[];
+  const repos=await gh(`/users/${handle}/repos?sort=pushed&per_page=30`);
   const emails=new Map();const repoRows=[];
   for(const r of repos){
     repoRows.push({name:r.name,pushed:(r.pushed_at||'').slice(0,10),lang:r.language,desc:(r.description||'').slice(0,70)});
@@ -217,7 +248,10 @@ async function deepDive(handle){
   let grav=null,avatar=null;
   if(topEmail){const h=await gravatarHash(topEmail);avatar=`https://secure.gravatar.com/avatar/${h}?d=identicon&s=160`;
     try{const r=await fetch(`https://en.gravatar.com/${h}.json`);NET.n++;if(r.ok){const j=await r.json();const e0=(j.entry||[])[0];if(e0)grav={email:topEmail,display:e0.displayName,accounts:(e0.accounts||[]).slice(0,6)}}}catch{}}
-  return{profile:{login:handle,name:p.name,loc:p.location,bio:p.blog,created:(p.created_at||'').slice(0,10),repos:p.public_repos,followers:p.followers},repoRows,emails:[...emails.values()],domains:[...domains],subdomains,grav,avatar,
+  const langs={};repoRows.forEach(r=>{if(r.lang)langs[r.lang]=(langs[r.lang]||0)+1});
+  const years={};repoRows.forEach(r=>{const y=(r.pushed||'').slice(0,4);if(y)years[y]=(years[y]||0)+1});
+  return{profile:{login:handle,name:p.name,loc:p.location,company:p.company,twitter:p.twitter_username,blog:p.blog||'',created:(p.created_at||'').slice(0,10),repos:p.public_repos,followers:p.followers,gists:p.public_gists,orgs:(orgs||[]).map(o=>o.login),updated:(p.updated_at||'').slice(0,10)},
+    langs,years,repoRows,emails:[...emails.values()],domains:[...domains],subdomains,grav,avatar,
     telemetry:{requests:NET.n,hits:NET.hits,ms:Date.now()-NET.t0}};
 }
 
@@ -256,8 +290,9 @@ async function candPaint(){
       ${gravatar?`<img src="${gravatar}">`:''}
       <div class="body">
         <div class="nm">${esc(c.name||c.handle)} <span class="score">match ${c.score||0}</span></div>
-        <div class="meta">@${esc(c.handle)} · ${esc(c.loc||'loc?')} · since ${esc(c.created||'?')} · ${esc(c.repos??'?')} repos</div>
-        ${c.emails?.length?`<div class="meta">${c.emails.slice(0,2).map(e=>esc(e.email)).join(' · ')}</div>`:''}
+        <div class="meta">@${esc(c.handle)} · ${esc(c.loc||'loc ?')} · since ${esc((c.created||'?').slice(0,4))} · ${esc(c.repos??'?')} repos</div>
+        ${c.topRepos?.length?`<div class="meta" style="color:#6f6f76">top: ${c.topRepos.map(r=>esc(r.name)).join(' · ')}</div>`:''}
+        ${c.emails?.length?`<div class="meta">${c.emails.slice(0,2).map(e=>esc(e.email)).join(' · ')} <span style="color:var(--faint)">(${c.emails.length})</span></div>`:''}
       </div>
       <div style="text-align:right"><div class="code">${code}</div><button data-pick="${i}" style="font-size:10px;padding:2px 8px;margin-top:4px">PICK</button></div>
     </div>`;htmlOut+=row;}
@@ -283,15 +318,26 @@ function dossierPaint(){
   const P=D.profile;let rows='';
   D.repoRows.forEach(r=>rows+=`<tr><td>repo</td><td>${esc(r.name)}</td><td>${esc(r.lang||'—')}</td><td>${esc(r.pushed)}</td><td>${esc(r.desc||'')}</td></tr>`);
   D.emails.forEach(e=>rows+=`<tr><td>email</td><td colspan=2>${esc(e.email)} <span style="color:var(--dim)">${esc(e.name||'')}</span></td><td>${esc(e.date||'')}</td><td>commit author</td></tr>`);
-  Object.entries(D.subdomains||{}).forEach(([d,list])=>list.slice(0,10).forEach(s=>rows+=`<tr><td>dns</td><td colspan=3>${esc(s)}</td><td>crt.sh @${esc(d)}</td>`));
+  Object.entries(D.subdomains||{}).forEach(([d,list])=>{rows+=`<tr><td>domain</td><td colspan=2><b>${esc(d)}</b></td><td>${list.length} subdomains</td><td>crt.sh aggregate</td></tr>`;
+    list.slice(0,8).forEach(x=>rows+=`<tr><td>dns</td><td colspan=3>${esc(x)}</td><td>crt.sh @${esc(d)}</td></tr>`);});
   (D.grav?.accounts||[]).forEach(a=>rows+=`<tr><td>social</td><td colspan=3><a href="${esc(a.url)}">${esc(a.domain)}</a></td><td>gravatar</td></tr>`);
   $(el).innerHTML=`
   <div class="card"><h2>SUBJECT — ${esc(P.name||S.picked.handle)}<span class="cnt">@${esc(P.login)}</span></h2>
     ${D.avatar?`<img class="avatar-lg" src="${D.avatar}">`:''}
     <div class="kv"><b>HANDLE</b><span>${esc(P.login)}</span><b>NAME</b><span>${esc(P.name||'—')}</span></div>
     <div class="kv" style="margin-top:4px"><b>LOCATION</b><span>${esc(P.loc||'—')}</span><b>BIO</b><span>${esc((P.bio||'—').slice(0,80))}</span></div>
-    <div class="kv" style="margin-top:4px"><b>ON GITHUB SINCE</b><span>${esc(P.created)}</span><b>PUBLIC REPOS</b><span>${P.repos} · ${P.followers} followers</span></div>
-    <div class="tags"><span class="tag ok">picked via ${esc(S.picked.code||'')}</span><span class="tag">${esc(S.stage)}</span></div>
+    <div class="kv" style="margin-top:4px"><b>ON GITHUB SINCE</b><span>${esc(P.created)} <span style="color:var(--faint)">(updated ${esc(P.updated||'')})</span></span><b>REPOS · GISTS</b><span>${P.repos} · ${P.gists??0}</span></div>
+    <div class="kv" style="margin-top:4px"><b>FOLLOWERS</b><span>${P.followers}</span><b>COMPANY</b><span>${esc(P.company||'—')}</span></div>
+    <div class="kv" style="margin-top:4px"><b>ORGS</b><span>${esc((P.orgs||[]).join(', ')||'—')}</span><b>TWITTER</b><span>${esc(P.twitter?'@'+P.twitter:'—')}</span></div>
+    <div class="kv" style="margin-top:4px"><b>BLOG</b><span>${P.blog?`<a href="${esc(P.blog)}">${esc(P.blog)}</a>`:'—'}</span><b>LOCATION</b><span>${esc(P.loc||'—')}</span></div>
+    <div class="tags"><span class="tag ok">picked via ${esc(S.picked.code||'')}</span><span class="tag">${esc(S.stage)}</span>
+      <span class="tag warn">${D.emails.length} emails</span><span class="tag">${Object.values(D.subdomains||{}).flat().length} hosts</span></div>
+  </div>
+  <div class="card"><h2>LANGUAGE MIX<span class="cnt">repos by primary language</span></h2>
+    ${Object.entries(D.langs||{}).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([l,n])=>`<div class="trow"><span>${esc(l)}</span><div class="bar"><i style="width:${Math.round(100*n/Math.max(1,(D.langs&&Object.values(D.langs).reduce((x,y)=>x+y,0))||1))}%"></i></div><span>${n}</span></div>`).join('')||'<span style="color:var(--faint);font-size:11px">none</span>'}
+  </div>
+  <div class="card"><h2>COMMIT ACTIVITY<span class="cnt">push years across harvested repos</span></h2>
+    ${Object.entries(D.years||{}).sort().map(([y,n])=>`<div class="trow"><span>${y}</span><div class="bar"><i style="width:${Math.round(100*n/Math.max(1,(D.years&&Object.values(D.years).reduce((x,y)=>x+y,0))||1))}%"></i></div><span>${n}</span></div>`).join('')||'<span style="color:var(--faint);font-size:11px">none</span>'}
   </div>
   <div class="card"><h2>DOSSIER — ARTIFACTS<span class="cnt">${D.emails.length} emails · ${Object.values(D.subdomains||{}).flat().length} hosts</span></h2>
   <table><thead><tr><th>CLASS</th><th>ARTIFACT</th><th>META</th><th>DATE</th><th>SOURCE</th></tr></thead><tbody>${rows||'<tr><td colspan=5 style="color:var(--faint)">none</td></tr>'}</tbody></table></div>
@@ -324,8 +370,7 @@ function mainShell(){return`
   <div class="card"><h2>DOSSIER</h2><div id="dossier"><div id="empty">pick a candidate to deep-dive</div></div></div>`}
 
 $('#b-run').onclick=doFind;
-$('#b-none').onclick=()=>{if(!S)return flash('no session');S.stage='none-match';S.note='user: none of these';persist();renderAll();flash('marked none-match — tell the agent what you know')};
-$('#b-new').onclick=()=>{S=newSession('');S.stage='idle';$('#main').innerHTML='<div id="empty">new session — enter subject, FIND PEOPLE</div>';renderAll()};
+$('#b-new').onclick=()=>{S=newSession('');S.stage='idle';$('#main').innerHTML=GHOST_NEW;renderAll()}
 $('#b-save').onclick=()=>{if(!S)return flash('nothing');persist();flash('saved')};
 $('#b-del').onclick=()=>{if(!S)return;const all=store.all();all.sessions=all.sessions.filter(x=>x.id!==S.id);store.save(all);S=null;$('#main').innerHTML='<div id="empty">deleted.</div>';navPaint()};
 $('#b-export').onclick=()=>{if(!S)return flash('nothing');const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='osint-'+S.id+'.json';a.click()};
