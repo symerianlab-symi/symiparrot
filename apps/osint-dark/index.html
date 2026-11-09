@@ -158,6 +158,7 @@ code.codechip{color:var(--acc);background:#1c1114;padding:0 5px;border:1px solid
 
 <script>
 'use strict';
+window.onerror=(m,u,l)=>{const e=document.getElementById('jserr');if(e){e.style.display='block';e.textContent+=' '+m+'@'+l}};
 /* ============ OSINT DARK v2 — candidates first, code-pick workflow ============ */
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 const LS='osint-dark-v2';
@@ -452,10 +453,10 @@ async function renderAgentDossier(){const el=document.querySelector('#agentdossi
 
 function boot(){
   const all=store.all().sessions;
-  if(all.length){S=structuredClone(all[all.length-1]);renderAll()}else{S=null;navPut()}
+  if(all.length){S=structuredClone(all[all.length-1]);renderAll()}else{S=null;navPaint()}
   show('people');loadPeople();
 }
 window.addEventListener('DOMContentLoaded',boot);
 </script>
-</body>
+<div id="jserr" style="display:none;position:fixed;bottom:60px;left:12px;color:var(--bad);font-size:11px;max-width:60%;z-index:99"></div></body>
 </html>
