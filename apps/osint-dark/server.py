@@ -19,18 +19,20 @@ class H(SimpleHTTPRequestHandler):
         self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(b)))
         self.end_headers();self.wfile.write(b)
     def do_GET(self):
-        if self.path=='/api/state':return self._json(read_state())
+        p=self.path.split('?')[0]
+        if p.endswith('/api/state') or p=='/api/state':return self._json(read_state())
         return super().do_GET()
     def do_POST(self):
         n=int(self.headers.get('Content-Length') or 0)
         body=json.loads(self.rfile.read(n) or b'{}') if n else {}
         st=read_state()
-        if self.path=='/api/hints':
+        p=self.path.split('?')[0]
+        if p.endswith('/api/hints'):
             st['hints']={**st.get('hints',{}),**body};st['hints_at']=time.strftime('%Y-%m-%d %H:%M:%S')
-        elif self.path=='/api/pick':
+        elif p.endswith('/api/pick'):
             st.setdefault('picks',[]).append({'code':body.get('code'),'at':time.strftime('%H:%M:%S'),'note':body.get('note','')})
             st['last_pick']=body.get('code')
-        elif self.path=='/api/session':
+        elif p.endswith('/api/session'):
             st['session']=body
         else:return self._json({'ok':False,'error':'unknown'},404)
         STATE.write_text(json.dumps(st,indent=1))

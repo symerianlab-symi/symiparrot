@@ -279,7 +279,7 @@ function hintsPaint(){
   <div class="hrow"><span>school</span><input id="h-school" value="${esc(h.school||'')}" placeholder="institution"></div>
   <div class="hrow"><span>links</span><input id="h-links" value="${esc(h.links||'')}" placeholder="known urls, comma separated"></div>
   <div class="hrow"><span></span><button id="h-apply" style="width:100%">APPLY HINTS → RE-SCORE</button></div>`;
-  $('#h-apply').onclick=()=>{S.hints={text:$('#h-text').value,phone:$('#h-phone').value,location:$('#h-loc').value,school:$('#h-school').value,links:$('#h-links').value};persist();post('/api/hints',S.hints);flash('hints stored — they bias the next FIND')};
+  $('#h-apply').onclick=()=>{S.hints={text:$('#h-text').value,phone:$('#h-phone').value,location:$('#h-loc').value,school:$('#h-school').value,links:$('#h-links').value};persist();post('api/hints',S.hints);flash('hints stored — they bias the next FIND')};
 }
 async function candPaint(){
   const el=$('#cands');if(!el)return;
@@ -304,7 +304,7 @@ async function candPaint(){
   $$('#cands [data-pick]').forEach(b=>b.onclick=async()=>{
     const i=+b.dataset.pick;S.picked=S.candidates[i];
     badge('DEEP DIVING','warn');
-    post('/api/pick',{code:S.picked.code,handle:S.picked.handle});try{S.dossier=await deepDive(S.picked.handle);S.stage='picked';persist();renderAll();flash('deep dive complete — '+S.picked.handle)}
+    post('api/pick',{code:S.picked.code,handle:S.picked.handle});try{S.dossier=await deepDive(S.picked.handle);S.stage='picked';persist();renderAll();flash('deep dive complete — '+S.picked.handle)}
     catch(e){badge('ERROR','bad');flash(e.message)}
   });
 }
