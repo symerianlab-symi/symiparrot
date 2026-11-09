@@ -61,15 +61,23 @@ Fix lives in `~/.config/tmux/tmux.conf` (see `ops/tmux-scroll.conf`). Route by
 capability instead of by screen mode:
 
 ```
-bind -n WheelUpPane   if -F -t = "#{mouse_any_flag}" "send-keys -M" "if -F -t = '#{alternate_on}' 'send-keys -t = Up Up Up' 'copy-mode -e'"
-bind -n WheelDownPane if -F -t = "#{mouse_any_flag}" "send-keys -M" "if -F -t = '#{alternate_on}' 'send-keys -t = Down Down Down' 'copy-mode -e'"
+bind -n WheelUpPane   if -F -t = "#{mouse_any_flag}" "send-keys -M" "if -F -t = '#{alternate_on}' 'send-keys -t = Up' 'copy-mode -e'"
+bind -n WheelDownPane if -F -t = "#{mouse_any_flag}" "send-keys -M" "if -F -t = '#{alternate_on}' 'send-keys -t = Down' 'copy-mode -e'"
 bind -n S-WheelUpPane   copy-mode -e
 bind -n S-WheelDownPane copy-mode -e
+bind -n C-WheelUpPane   if -F -t = "#{mouse_any_flag}" "send-keys -M" "if -F -t = '#{alternate_on}' 'send-keys -t = PageUp' 'copy-mode -e'"
+bind -n C-WheelDownPane if -F -t = "#{mouse_any_flag}" "send-keys -M" "if -F -t = '#{alternate_on}' 'send-keys -t = PageDown' 'copy-mode -e'"
 ```
 
 1. app requested mouse tracking → forward the event (vim, less, htop)
 2. app is in alternate screen → send arrow keys (Symi, pagers)
 3. otherwise → tmux copy-mode (normal shell scrollback)
+
+**One arrow key = one display line.** Sending three per notch made a single notch
+jump three lines, and a fast scroll queued keys that kept processing after the
+wheel stopped — the view appeared to run past where you wanted to stop. One per
+notch is the finest step the app supports. Ctrl+wheel gives viewport jumps for
+long transcripts.
 
 Shift+wheel always reaches tmux scrollback, even inside a full-screen app.
 Verified: Symi pane resolves to SEND-ARROWS and scrolls; a plain shell resolves
