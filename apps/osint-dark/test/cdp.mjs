@@ -59,6 +59,8 @@ const send = (method, params = {}) => new Promise(res => {
 await send('Runtime.enable')
 await send('Log.enable')
 await send('Page.enable')
+const VW=parseInt(process.env.VW||'0',10)
+if(VW) await send('Emulation.setDeviceMetricsOverride',{width:VW,height:1200,deviceScaleFactor:1,mobile:false})
 await send('Page.navigate', { url: URL_ })
 await sleep(2500)
 
