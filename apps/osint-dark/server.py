@@ -22,6 +22,7 @@ class H(SimpleHTTPRequestHandler):
         p=self.path.split('?')[0]
         p0=self.path.split('?')[0]
         if p0.endswith('/api/dossier') and self.command=='GET':return self._json({'dossier':read_state().get('dossier')})
+        if p0.endswith('/api/dossiers') and self.command=='GET':return self._json({'dossiers':read_state().get('dossiers',{})})
         if p.endswith('/api/state') or p0=='/api/state':return self._json(read_state())
         return super().do_GET()
     def do_POST(self):
@@ -36,6 +37,10 @@ class H(SimpleHTTPRequestHandler):
             st['last_pick']=body.get('code')
         elif p.endswith('/api/dossier'):
             if 'overwrite' in body or True: st['dossier']=body.get('dossier',body)
+        elif p.endswith('/api/dossiers'):
+            d=st.setdefault('dossiers',{});key=body.get('subject') or body.get('key') or 'unnamed'
+            if body.get('delete'):d.pop(key,None)
+            else:d[key]=body.get('dossier',body)
         elif p.endswith('/api/session'):
             st['session']=body
         else:return self._json({'ok':False,'error':'unknown'},404)

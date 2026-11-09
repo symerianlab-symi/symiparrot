@@ -122,7 +122,9 @@ code.codechip{color:var(--acc);background:#1c1114;padding:0 5px;border:1px solid
 
 <div id="wrap">
   <nav id="nav">
-    <div class="navhead">SESSIONS</div>
+    <div class="navhead" style="display:flex;gap:6px">
+      <button id="tab-people" class="tabbtn active">PEOPLE</button>
+      <button id="tab-run" class="tabbtn">RUN</button></div>
     <div id="sessions"></div>
     <div class="navfoot">
       <button id="b-new">+ NEW SESSION</button>
@@ -131,16 +133,23 @@ code.codechip{color:var(--acc);background:#1c1114;padding:0 5px;border:1px solid
   </nav>
 
   <main id="main">
-    <div id="bootghost"><div id="ghost">
-  <svg width="120" height="120" viewBox="0 0 64 64" fill="none">
-    <path d="M32 6C20 6 12 15 12 27v23c0 2 2.5 3 4 1.6L20 47l4 4.4c1.4 1.5 3.6 1.5 5 0L32 47l3 4.4c1.4 1.5 3.6 1.5 5 0l4-4.4 4 4.6c1.5 1.4 4 .4 4-1.6V27C52 15 44 6 32 6z" stroke="#e5484d" stroke-width="2.2" fill="rgba(229,72,77,.06)"/>
-    <circle cx="24" cy="28" r="2.4" fill="#e5484d"/><circle cx="40" cy="28" r="2.4" fill="#e5484d"/>
-    <path d="M26 36c2 1.8 4 2.6 6 2.6s4-.8 6-2.6" stroke="#e5484d" stroke-width="1.6" stroke-linecap="round"/>
-  </svg>
-  <div class="gname">DARK OSINT GHOST</div>
-  <div class="gsub">PASSIVE COLLECTION // AWAITING TARGET</div>
-  <div class="redline"></div>
-</div><div id="empty" style="border:none">ENTER A SUBJECT — FIND PEOPLE</div></div>
+    <div id="bootghostGoes"></div>
+    <section id="view-people" class="view">
+      <div class="card"><h2>PEOPLE — INVESTIGATION ROSTER<span class="cnt">click a name</span></h2><div id="people"></div></div>
+    </section>
+    <section id="view-profile" class="view" style="display:none">
+      <div id="profile-head"></div>
+      <div class="card"><h2>AGENT DOSSIER — ANALYSIS<span class="cnt">published by the agent</span></h2><div id="agentdossier" style="font-size:12px;color:#b9b9b9">…</div></div>
+      <div class="card"><h2>ARTIFACTS<span class="cnt">raw evidence rows</span></h2><div id="artifacts"><span style="color:var(--faint);font-size:11px">none</span></div></div>
+      <div class="card"><h2>RAW LAYER JSON</h2><pre id="rawjson" style="font-size:10px;color:#8a8a8a;white-space:pre-wrap;max-height:220px;overflow:auto"></pre></div>
+    </section>
+    <section id="view-run" class="view" style="display:none">
+      <div class="card"><h2>CANDIDATES — PICK A CODE<span class="cnt">give the code to the agent</span></h2><div id="cands"></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--dim)">reply in chat with a <code class="codechip">P##</code>, or NONE.</div></div>
+      <div class="card"><h2>REFINE — MORE ABOUT THE RIGHT PERSON</h2><div id="hints"></div></div>
+      <div class="card"><h2>TELEMETRY</h2><div id="telemetry"></div><div id="netlog"></div></div>
+      <div id="runDossierHost"></div>
+    </section>
   </main>
 </div>
 
@@ -374,14 +383,15 @@ function persist(){const all=store.all();const i=all.sessions.findIndex(s=>s.id=
 async function doFind(){
   const subject=$('#subject').value.trim();if(!subject)return flash('enter subject');
   S=S&&S.subject===subject?S:newSession(subject);S.subject=subject;S.stage='candidates';badge('SCANNING','warn');
-  $('#main').innerHTML=mainShell();hintsPaint();
+  show('run');ensureRunShell();hintsPaint();
   try{const r=await findCandidates(subject,$('#depth').value);
     S.candidates=r.candidates;S.telemetry=r.telemetry;S.netlog=NET.log;persist();renderAll();badge('CANDIDATES','ok');
     flash(`${r.candidates.length} candidates — copy a P-code to the agent`);
   }
   catch(e){badge('ERROR','bad');$('#main').innerHTML=`<div id="empty">COLLECT ERROR ${esc(e.message)}</div>`}
 }
-function mainShell(){return`
+function ensureRunShell(){/* legacy no-op */}
+function mainShellUnused(){return`
   <div class="card"><h2>CANDIDATES — PICK A CODE<span class="cnt">give the code to the agent</span></h2><div id="cands"></div>
     <div style="margin-top:8px;font-size:11px;color:var(--dim)">reply in chat with a <code class="codechip">P##</code> to deep-dive, or NONE.</div></div>
   <div class="card"><h2>REFINE — MORE ABOUT THE RIGHT PERSON</h2><div id="hints"></div></div>
@@ -395,10 +405,57 @@ $('#b-del').onclick=()=>{if(!S)return;const all=store.all();all.sessions=all.ses
 $('#b-export').onclick=()=>{if(!S)return flash('nothing');const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='osint-'+S.id+'.json';a.click()};
 
 /* restore last or idle */
-(function boot(){
+/* ---- views ---- */
+function show(view){['people','profile','run'].forEach(v=>{
+  const el=document.getElementById('view-'+v);if(el)el.classList.toggle('on',v===view)});
+  document.getElementById('tab-people').classList.toggle('active',view==='people');
+  document.getElementById('tab-run').classList.toggle('active',view==='run');
+}
+$('#tab-people').onclick=()=>{show('people');loadPeople()};
+$('#tab-run').onclick=()=>show('run');
+
+/* ---- PEOPLE roster: every subject with a published dossier ---- */
+let PEOPLE={};
+async function loadPeople(){
+  try{const r=await fetch('api/dossiers');const j=await r.json();PEOPLE=j.dossiers||{}}catch{PEOPLE={}}
+  // merge any localStorage-session subjects that have picks (dossier pending publish)
+  const el=document.getElementById('people');
+  const keys=Object.keys(PEOPLE).sort();
+  if(!keys.length){el.innerHTML='<div style="color:var(--faint);font-size:11px;padding:8px">no published people yet</div>';return}
+  el.innerHTML=keys.map(k=>{
+    const d=PEOPLE[k];const sub=d.dossier&&d.dossier.title||k;
+    return`<div class="person" data-k="${esc(k)}"><div class="pn">${esc(sub)}</div><div class="pm">${esc((d.dossier&&d.dossier.when)||'')} · click to open dossier</div></div>`}).join('');
+  $$('#people .person').forEach(el=>el.onclick=()=>openPerson(el.dataset.k));
+}
+function openPerson(key){
+  const wrap=PEOPLE[key];if(!wrap)return;
+  const d=wrap.dossier||wrap;
+  show('profile');
+  document.getElementById('profile-head').innerHTML=`<div class="card"><h2>SUBJECT — ${esc((d.title||key).toUpperCase())}<span class="cnt">dossier</span></h2></div>`;
+  renderAgentDossierInto(document.querySelector('#view-profile #agentdossier'),d.text||'');
+  document.getElementById('artifacts').innerHTML=`<pre style="font-size:11px;color:#9a9a9a;white-space:pre-wrap">${esc(d.raw||JSON.stringify(d,null,1).slice(0,3000))}</pre>`;
+  document.getElementById('rawjson').textContent=JSON.stringify(d,null,1).slice(0,4000);
+}
+async function renderAgentDossierInto(el,txt){
+  if(!el)return;
+  if(!txt){el.innerHTML='<span style="color:var(--faint)">no dossier published yet</span>';return}
+  const html=txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/^# (.*)$/gm,'<div style="color:#e5484d;font-size:14px;letter-spacing:1px;margin:8px 0 4px">$1</div>')
+    .replace(/^## (.*)$/gm,'<div style="color:#e5484d;margin:7px 0 3px">$1</div>')
+    .replace(/\*\*(.*?)\*\*/g,'<b style="color:#ddd">$1</b>')
+    .replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1">$1</a>')
+.replace(/\\n/g,'<br>');
+  el.innerHTML=html;
+}
+async function renderAgentDossier(){const el=document.querySelector('#agentdossier');if(!el)return;
+  try{const r=await fetch('api/dossier');const j=await r.json();await renderAgentDossierInto(el,(j.dossier&&j.dossier.text)||'')}catch(e){}}
+
+function boot(){
   const all=store.all().sessions;
-  if(all.length){S=structuredClone(all[all.length-1]);renderAll()}else{S=null;navPaint()}
-})();
+  if(all.length){S=structuredClone(all[all.length-1]);renderAll()}else{S=null;navPut()}
+  show('people');loadPeople();
+}
+window.addEventListener('DOMContentLoaded',boot);
 </script>
 </body>
 </html>
