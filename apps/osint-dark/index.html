@@ -3,41 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OSINT DARK — Agent Profile System v2</title>
+<title>OSINT DARK</title>
+<link rel="icon" href="favicon.ico" type="image/svg+xml">
 <style>
 :root{
   --bg:#0a0a0c; --panel:#101013; --panel2:#15151a; --line:#222228; --line2:#2e2e36;
   --txt:#c6c6c6; --dim:#83838a; --faint:#55555c;
-  --acc:#e5484d; --acc2:#a83a3e; --ok:#6fbf8a; --warn:#d3a94f; --bad:#e5484d; --sel:#241417;
-  --redline:#e5484d; --redglow:#rgba(229,72,77,.35);
+  --acc:#e5484d; --acc2:#a83a3e; --ok:#6fbf8a; --warn:#d3a94f; --bad:#e5484d;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{background:var(--bg);color:var(--txt);font:13px/1.5 "SF Mono",Consolas,"JetBrains Mono",monospace;display:flex;flex-direction:column}
 
-/* header */
 header{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding:10px 16px;background:var(--panel)}
 h1{font-size:14px;letter-spacing:5px;color:#ececec;font-weight:600}
 #datestamp{color:var(--dim);font-size:11px}
 .spacer{flex:1}
 .badge{border:1px solid var(--line2);padding:2px 10px;font-size:11px;color:var(--dim)}
-.badge.ok{color:var(--ok);border-color:#2e4a33}.badge.warn{color:var(--warn);border-color:#4a3f2e}.badge.bad{color:var(--bad);border-color:#4a2e2e}
+.badge.ok{color:var(--ok);border-color:#2e4a33}
+.badge.warn{color:var(--warn);border-color:#4a3f2e}
+.badge.bad{color:var(--bad);border-color:#4a2e2e}
 
-/* toolbar */
 #toolbar{display:flex;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel2);flex-wrap:wrap;align-items:center}
 input,select,textarea{background:#101010;border:1px solid var(--line);color:var(--txt);padding:6px 9px;font:inherit;font-size:12px;border-radius:2px}
 input:focus,select:focus,textarea:focus{outline:1px solid var(--acc2);border-color:var(--acc2)}
-#subject{min-width:300px}
+#subject{flex:1;min-width:260px}
 button{background:#1a1a1a;color:var(--txt);border:1px solid var(--line2);padding:5px 13px;font:inherit;font-size:12px;cursor:pointer;border-radius:2px}
 button:hover{border-color:var(--acc);color:#fff;background:#202020}
 button.primary{border-color:#5c2020;color:var(--acc)}
 button.primary:hover{background:#201414}
 button:disabled{opacity:.45;cursor:default}
 
-/* layout */
 #wrap{flex:1;display:grid;grid-template-columns:270px 1fr;min-height:0}
 nav#nav{border-right:1px solid var(--line);background:#181818;display:flex;flex-direction:column;min-height:0}
-nav .navhead{padding:8px 12px;font-size:10px;letter-spacing:2px;color:var(--faint);border-bottom:1px solid var(--line)}
+.navhead{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--line)}
+.tabbtn{flex:1;font-size:10px;letter-spacing:1.5px;padding:5px 4px}
+.tabbtn.active{border-color:var(--acc);color:var(--acc);background:#1c1114}
 #sessions{flex:1;overflow-y:auto}
 .ses{padding:7px 12px;border-bottom:1px solid #202020;cursor:pointer;font-size:12px}
 .ses:hover{background:#1f1f1f}
@@ -48,9 +49,31 @@ nav .navhead{padding:8px 12px;font-size:10px;letter-spacing:2px;color:var(--fain
 .navfoot button{width:100%;font-size:11px}
 
 main{overflow-y:auto;padding:14px 18px;min-width:0}
+.view{display:none}
+.view.on{display:block}
 .card{background:var(--panel);border:1px solid var(--line);padding:12px 14px;margin-bottom:14px}
 .card h2{font-size:10px;letter-spacing:2.5px;color:var(--acc);border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:10px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
-.card h2 .cnt{color:var(--faint);letter-spacing:0}
+.card h2 .cnt{color:var(--faint);letter-spacing:0;font-weight:400}
+.hintline{color:var(--faint);font-size:11px;padding:8px 0}
+.dim{color:var(--faint)}
+
+/* people roster */
+.person{padding:10px 12px;border:1px solid var(--line);margin-bottom:7px;background:#191919;cursor:pointer;transition:border-color .12s,background .12s}
+.person:hover,.person:focus{border-color:var(--acc);background:#1c1416;outline:none}
+.person .pn{color:#e8e8e8;font-size:13px}
+.person .pm{color:var(--dim);font-size:10px;margin-top:2px;letter-spacing:.5px}
+.person .ps{color:#6f6f76;font-size:11px;margin-top:5px;line-height:1.4}
+
+/* ghost identity mark */
+#ghost{display:none;flex-direction:column;align-items:center;padding:60px 0 30px}
+#ghost svg{filter:drop-shadow(0 0 14px rgba(229,72,77,.45))}
+#ghost .gname{margin-top:14px;font-size:18px;letter-spacing:8px;color:#dedede;font-weight:600}
+#ghost .gsub{margin-top:4px;font-size:10px;letter-spacing:3px;color:var(--faint)}
+.redline{width:340px;height:1px;background:linear-gradient(90deg,transparent,var(--acc),transparent);margin-top:18px;position:relative;overflow:visible}
+.redline::after{content:'';position:absolute;top:-2px;left:0;width:56px;height:5px;border-radius:3px;background:var(--acc);box-shadow:0 0 12px 2px rgba(229,72,77,.55);animation:sweep 2.6s cubic-bezier(.45,.05,.55,.95) infinite}
+@keyframes sweep{0%{left:-60px}55%{left:344px}100%{left:-60px}}
+@keyframes ghostpulse{0%,100%{opacity:.85}50%{opacity:1}}
+#ghost svg path{animation:ghostpulse 3.2s ease-in-out infinite}
 
 /* candidates */
 .cand{display:flex;gap:10px;padding:8px;border:1px solid var(--line);margin-bottom:6px;background:#191919;align-items:flex-start}
@@ -60,38 +83,50 @@ main{overflow-y:auto;padding:14px 18px;min-width:0}
 .cand .body{flex:1;min-width:0}
 .cand .nm{color:#e6e6e6;font-size:13px}
 .cand .meta{color:var(--dim);font-size:11px;margin-top:1px}
-
-/* ghost identity mark */
-#ghost{display:none;flex-direction:column;align-items:center;padding:70px 0 30px}
-#bootghost #ghost{display:flex}
-#ghost svg{drop-shadow(0 0 14px rgba(229,72,77,.45))}
-#ghost .gname{margin-top:14px;font-size:18px;letter-spacing:8px;color:#dedede;font-weight:600}
-#ghost .gsub{margin-top:4px;font-size:10px;letter-spacing:3px;color:var(--faint)}
-.redline{width:340px;height:1px;background:linear-gradient(90deg,transparent,var(--redline),transparent);margin-top:18px;position:relative;overflow:visible}
-.redline::after{content:'';position:absolute;top:-2px;left:0;width:56px;height:5px;border-radius:3px;background:var(--redline);box-shadow:0 0 12px 2px rgba(229,72,77,.55);animation:sweep 2.6s cubic-bezier(.45,.05,.55,.95) infinite}
-@keyframes sweep{0%{left:-60px}55%{left:344px}100%{left:-60px}}
-@keyframes ghostpulse{0%,100%{opacity:.85}50%{opacity:1}}
-#ghost svg path{animation:ghostpulse 3.2s ease-in-out infinite}
-.cand .code{font-size:16px;color:var(--acc);border:1px solid #4a2024;background:#1c1114;padding:2px 8px;letter-spacing:1px;font-weight:700}
 .cand .score{color:var(--warn);font-size:10px;margin-left:6px}
-#hints textarea{width:100%;min-height:44px;resize:vertical}
+.candright{text-align:right}
+.cand .code{font-size:16px;color:var(--acc);border:1px solid #4a2024;background:#1c1114;padding:2px 8px;letter-spacing:1px;font-weight:700}
+.candright button{font-size:10px;padding:2px 8px;margin-top:4px}
+
+/* hints */
 .hrow{display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;margin-bottom:5px;font-size:11px;color:var(--dim)}
 .hrow input{width:100%}
 
-/* profile + tables */
+/* profile */
 .kv{display:grid;grid-template-columns:120px 1fr;gap:3px 10px;font-size:12px}
 .kv b{color:var(--dim);font-weight:400}
+.rerun{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.rerun button{font-size:11px}
 .avatar-lg{width:110px;height:110px;border:1px solid var(--line2);background:#0e0e0e;object-fit:cover;float:right;margin:0 0 8px 10px}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{text-align:left;color:var(--faint);font-weight:400;border-bottom:1px solid var(--line2);padding:3px 7px;letter-spacing:1px;font-size:10px}
 td{border-bottom:1px solid #222;padding:4px 7px;vertical-align:top;color:#bdbdbd}
 tr:hover td{background:#1f1f1f}
-a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+a{color:var(--acc);text-decoration:none}
+a:hover{text-decoration:underline}
 .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
 .tag{border:1px solid var(--line2);padding:1px 8px;font-size:10px;color:var(--dim)}
-.tag.ok{color:var(--ok);border-color:#2e4a33}.tag.warn{color:var(--warn);border-color:#4a3f2e}.tag.bad{color:var(--bad);border-color:#4a2e2e}
+.tag.ok{color:var(--ok);border-color:#2e4a33}
+.tag.warn{color:var(--warn);border-color:#4a3f2e}
+.tag.bad{color:var(--bad);border-color:#4a2e2e}
 
-/* telemetry bars */
+/* markdown dossier */
+.md{font-size:12px;color:#b9b9b9;line-height:1.6}
+.md .md-h1{color:var(--acc);font-size:14px;letter-spacing:1px;margin:12px 0 5px;font-weight:600}
+.md .md-h2{color:var(--acc);font-size:12px;margin:10px 0 4px;font-weight:600}
+.md .md-h3{color:#d8d8d8;font-size:11px;letter-spacing:1px;margin:8px 0 3px;font-weight:600}
+.md p{margin:2px 0}
+.md ul{margin:4px 0 4px 18px}
+.md li{margin:1px 0}
+.md b{color:#e2e2e2}
+.md code{color:var(--acc);background:#1c1114;padding:0 4px;border:1px solid #4a2024}
+.md .md-gap{height:7px}
+pre.raw{font-size:11px;color:#9a9a9a;white-space:pre-wrap;word-break:break-word;max-height:340px;overflow:auto}
+figure{margin:0 0 10px}
+figure img{max-width:100%;border:1px solid var(--line2);background:#0e0e0e}
+figcaption{font-size:10px;color:var(--faint);word-break:break-all;margin-top:3px}
+
+/* telemetry */
 .trow{display:grid;grid-template-columns:110px 1fr 70px;gap:8px;align-items:center;font-size:11px;margin-bottom:4px;color:var(--dim)}
 .bar{height:5px;background:#101010;border:1px solid #222}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc))}
@@ -101,7 +136,7 @@ a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
 
 footer{border-top:1px solid var(--line);padding:6px 16px;color:#4e4e4e;font-size:10px;display:flex;gap:14px}
 .flash{position:fixed;bottom:16px;right:16px;background:#151012;border:1px solid var(--acc);color:var(--acc);padding:8px 16px;font-size:12px;display:none;z-index:9;box-shadow:0 0 18px #3a1416}
-#empty{color:var(--faint);padding:60px 20px;text-align:center;border:1px dashed var(--line);margin:20px}
+#jserr{display:none;position:fixed;bottom:60px;left:12px;color:var(--bad);font-size:11px;max-width:60%;z-index:99;background:#1a0e10;border:1px solid var(--bad);padding:6px 10px}
 code.codechip{color:var(--acc);background:#1c1114;padding:0 5px;border:1px solid #4a2024}
 </style>
 </head>
@@ -112,351 +147,560 @@ code.codechip{color:var(--acc);background:#1c1114;padding:0 5px;border:1px solid
 </header>
 
 <div id="toolbar">
-  <input id="subject" placeholder="subject: name / handle / domain / email" style="flex:1;min-width:260px">
+  <input id="subject" placeholder="subject: name / handle / domain / email">
   <select id="depth"><option value="standard">standard</option><option value="deep">deep</option></select>
   <button class="primary" id="b-run">&#9654; FIND PEOPLE</button>
-  <button id="b-none" title="mark candidates stage done, none match">NONE MATCH</button>
+  <button id="b-none" title="no candidate matches — record NONE">NONE MATCH</button>
   <button id="b-save">SAVE</button>
   <button id="b-del">DEL</button>
 </div>
 
 <div id="wrap">
   <nav id="nav">
-    <div class="navhead" style="display:flex;gap:6px">
+    <div class="navhead">
       <button id="tab-people" class="tabbtn active">PEOPLE</button>
-      <button id="tab-run" class="tabbtn">RUN</button></div>
+      <button id="tab-run" class="tabbtn">RUN</button>
+    </div>
     <div id="sessions"></div>
     <div class="navfoot">
       <button id="b-new">+ NEW SESSION</button>
+      <button id="b-refresh">REFRESH PEOPLE</button>
       <button id="b-export">EXPORT JSON</button>
     </div>
   </nav>
 
   <main id="main">
-    <div id="bootghostGoes"></div>
-    <section id="view-people" class="view">
-      <div class="card"><h2>PEOPLE — INVESTIGATION ROSTER<span class="cnt">click a name</span></h2><div id="people"></div></div>
+    <section id="view-people" class="view on">
+      <div id="ghost">
+        <svg width="120" height="120" viewBox="0 0 64 64" fill="none">
+          <path d="M32 6C20 6 12 15 12 27v23c0 2 2.5 3 4 1.6L20 47l4 4.4c1.4 1.5 3.6 1.5 5 0L32 47l3 4.4c1.4 1.5 3.6 1.5 5 0l4-4.4 4 4.6c1.5 1.4 4 .4 4-1.6V27C52 15 44 6 32 6z" stroke="#e5484d" stroke-width="2.2" fill="rgba(229,72,77,.06)"/>
+          <circle cx="24" cy="28" r="2.4" fill="#e5484d"/><circle cx="40" cy="28" r="2.4" fill="#e5484d"/>
+          <path d="M26 36c2 1.8 4 2.6 6 2.6s4-.8 6-2.6" stroke="#e5484d" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <div class="gname">DARK OSINT GHOST</div>
+        <div class="gsub">PASSIVE COLLECTION // AWAITING TARGET</div>
+        <div class="redline"></div>
+      </div>
+      <div class="card"><h2>PEOPLE — INVESTIGATION ROSTER<span class="cnt">click a name to open the dossier</span></h2><div id="people"></div></div>
     </section>
-    <section id="view-profile" class="view" style="display:none">
+
+    <section id="view-profile" class="view">
       <div id="profile-head"></div>
-      <div class="card"><h2>AGENT DOSSIER — ANALYSIS<span class="cnt">published by the agent</span></h2><div id="agentdossier" style="font-size:12px;color:#b9b9b9">…</div></div>
-      <div class="card"><h2>ARTIFACTS<span class="cnt">raw evidence rows</span></h2><div id="artifacts"><span style="color:var(--faint);font-size:11px">none</span></div></div>
-      <div class="card"><h2>RAW LAYER JSON</h2><pre id="rawjson" style="font-size:10px;color:#8a8a8a;white-space:pre-wrap;max-height:220px;overflow:auto"></pre></div>
+      <div class="card"><h2>AGENT DOSSIER — ANALYSIS<span class="cnt">published by the agent</span></h2><div id="agentdossier" class="md"></div></div>
+      <div class="card"><h2>IMAGES<span class="cnt">from dossier evidence</span></h2><div id="images"></div></div>
+      <div class="card"><h2>ARTIFACTS<span class="cnt">raw evidence</span></h2><div id="artifacts"></div></div>
+      <div class="card"><h2>RAW LAYER JSON</h2><pre id="rawjson" class="raw"></pre></div>
     </section>
-    <section id="view-run" class="view" style="display:none">
-      <div class="card"><h2>CANDIDATES — PICK A CODE<span class="cnt">give the code to the agent</span></h2><div id="cands"></div>
-        <div style="margin-top:8px;font-size:11px;color:var(--dim)">reply in chat with a <code class="codechip">P##</code>, or NONE.</div></div>
+
+    <section id="view-run" class="view">
+      <div class="card"><h2>CANDIDATES — PICK A CODE<span class="cnt">give the code to the agent</span></h2>
+        <div id="cands"></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--dim)">reply in chat with a <code class="codechip">P##</code>, or press NONE MATCH.</div>
+      </div>
       <div class="card"><h2>REFINE — MORE ABOUT THE RIGHT PERSON</h2><div id="hints"></div></div>
       <div class="card"><h2>TELEMETRY</h2><div id="telemetry"></div><div id="netlog"></div></div>
-      <div id="runDossierHost"></div>
+      <div class="card"><h2>DEEP DIVE — BROWSER COLLECTION</h2><div id="runDossier"></div></div>
     </section>
   </main>
 </div>
 
-<footer><span>symiparrot // osint-dark v2</span><span>passive collection // sources in-row</span><span id="fcount"></span></footer>
+<footer><span>symiparrot // osint-dark v3</span><span>passive collection // sources in-row</span><span id="fcount"></span></footer>
 <div class="flash" id="flash"></div>
+<div id="jserr"></div>
 
 <script>
 'use strict';
-window.onerror=(m,u,l)=>{const e=document.getElementById('jserr');if(e){e.style.display='block';e.textContent+=' '+m+'@'+l}};
-/* ============ OSINT DARK v2 — candidates first, code-pick workflow ============ */
-const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
-const LS='osint-dark-v2';
-const now=()=>new Date().toISOString().replace('T',' ').slice(0,16)+'Z';
+/* ================= OSINT DARK v3 ================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const LS='osint-dark-v3';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const GHOST_NEW=`<div id="ghost">
-  <svg width="120" height="120" viewBox="0 0 64 64" fill="none">
-    <path d="M32 6C20 6 12 15 12 27v23c0 2 2.5 3 4 1.6L20 47l4 4.4c1.4 1.5 3.6 1.5 5 0L32 47l3 4.4c1.4 1.5 3.6 1.5 5 0l4-4.4 4 4.6c1.5 1.4 4 .4 4-1.6V27C52 15 44 6 32 6z" stroke="#e5484d" stroke-width="2.2" fill="rgba(229,72,77,.06)"/>
-    <circle cx="24" cy="28" r="2.4" fill="#e5484d"/><circle cx="40" cy="28" r="2.4" fill="#e5484d"/>
-    <path d="M26 36c2 1.8 4 2.6 6 2.6s4-.8 6-2.6" stroke="#e5484d" stroke-width="1.6" stroke-linecap="round"/>
-  </svg>
-  <div class="gname">DARK OSINT GHOST</div><div class="gsub">PASSIVE COLLECTION // AWAITING TARGET</div>
-  <div class="redline"></div></div><div id="empty" style="border:none">NEW SESSION — FIND PEOPLE</div>`;
-const flash=m=>{const f=$('#flash');f.textContent=m;f.style.display='block;';f.style.display='block';setTimeout(()=>f.style.display='none',2200)};
-$('#datestamp').textContent=now();setInterval(()=>$('#datestamp').textContent=now(),30000);
+const nowISO=()=>new Date().toISOString().replace('T',' ').slice(0,16)+'Z';
 
-/* ---------- store: sessions[] with stages ---------- */
+function jserr(m){const e=$('#jserr');if(!e)return;e.style.display='block';e.textContent='JS ERROR: '+m}
+window.onerror=(m,u,l)=>{jserr(m+' @'+l);return false};
+window.addEventListener('unhandledrejection',e=>jserr('promise: '+((e.reason&&e.reason.message)||e.reason)));
 
-/* server handoff (fire-and-forget; works when served via server.py) */
-const post=(path,body)=>{try{fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).catch(()=>{})}catch(e){}};
+const flash=m=>{const f=$('#flash');if(!f)return;f.textContent=m;f.style.display='block';clearTimeout(flash._t);flash._t=setTimeout(()=>f.style.display='none',2600)};
+const badge=(t,c)=>{const b=$('#mode');if(!b)return;b.textContent=t;b.className='badge '+(c||'')};
 
+/* ---------- api ---------- */
+async function api(path,opts){
+  const r=await fetch(path,opts);
+  if(!r.ok) throw new Error(path+' -> '+r.status);
+  return r.json();
+}
+const postJSON=(path,body)=>api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+  .catch(e=>{console.warn('POST failed',path,e.message);return null});
+
+/* ---------- md5 (WebCrypto has no MD5) ---------- */
+function md5(str){
+  const S=[7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,
+           4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+  const K=[-680876936,-389564586,606105819,-1044525330,-176418897,1200080426,-1473231341,-45705983,
+           1770035416,-1958414417,-42063,-1990404162,1804603682,-40341101,-1502002290,1236535329,
+           -165796510,-1069501632,643717713,-373897302,-701558691,38016083,-660478335,-405537848,
+           568446438,-1019803690,-187363961,1163531501,-1444681467,-51403784,1735328473,-1926607734,
+           -378558,-2022574463,1839030562,-35309556,-1530992060,1272893353,-155497632,-1094730640,
+           681279174,-358537222,-722521979,76029189,-640364487,-421815835,530742520,-995338651,
+           -198630844,1126891415,-1416354905,-57434055,1700485571,-1894986606,-1051523,-2054922799,
+           1873313359,-30611744,-1560198380,1309151649,-145523070,-1120210379,718787259,-343485551];
+  const s=unescape(encodeURIComponent(String(str)));
+  const x=[];
+  for(let i=0;i<s.length;i++) x[i>>2]|=s.charCodeAt(i)<<((i%4)*8);
+  x[s.length>>2]|=0x80<<((s.length%4)*8);
+  const n=s.length*8;
+  x[(((n+64)>>>9)<<4)+14]=n;
+  let a=1732584193,b=-271733879,c=-1732584194,d=271733878;
+  for(let i=0;i<x.length;i+=16){
+    const aa=a,bb=b,cc=c,dd=d;
+    for(let j=0;j<64;j++){
+      let f,g;
+      if(j<16){f=(b&c)|(~b&d);g=j}
+      else if(j<32){f=(d&b)|(~d&c);g=(5*j+1)%16}
+      else if(j<48){f=b^c^d;g=(3*j+5)%16}
+      else{f=c^(b|~d);g=(7*j)%16}
+      const t=d;d=c;c=b;
+      const sum=(a+f+K[j]+(x[i+g]|0))|0;
+      const sh=S[j];
+      b=(b+((sum<<sh)|(sum>>>(32-sh))))|0;
+      a=t;
+    }
+    a=(a+aa)|0;b=(b+bb)|0;c=(c+cc)|0;d=(d+dd)|0;
+  }
+  const h=v=>{let o='';for(let j=0;j<4;j++)o+=('0'+((v>>(j*8))&255).toString(16)).slice(-2);return o};
+  return h(a)+h(b)+h(c)+h(d);
+}
+
+/* ---------- markdown ---------- */
+function mdToHtml(txt){
+  const inline=s=>s
+    .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/(https?:\/\/[^\s<)]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+  const lines=esc(txt).split('\n');
+  const out=[];let inList=false;
+  for(const ln of lines){
+    const h1=ln.match(/^#\s+(.*)$/),h2=ln.match(/^##\s+(.*)$/),h3=ln.match(/^###\s+(.*)$/);
+    const li=ln.match(/^\s*[-*]\s+(.*)$/);
+    if(li){if(!inList){out.push('<ul>');inList=true}out.push('<li>'+inline(li[1])+'</li>');continue}
+    if(inList){out.push('</ul>');inList=false}
+    if(h1){out.push('<div class="md-h1">'+inline(h1[1])+'</div>');continue}
+    if(h2){out.push('<div class="md-h2">'+inline(h2[1])+'</div>');continue}
+    if(h3){out.push('<div class="md-h3">'+inline(h3[1])+'</div>');continue}
+    if(!ln.trim()){out.push('<div class="md-gap"></div>');continue}
+    out.push('<p>'+inline(ln)+'</p>');
+  }
+  if(inList)out.push('</ul>');
+  return out.join('');
+}
+
+/* ---------- store ---------- */
 const store={
-  all:()=>{try{return JSON.parse(localStorage.getItem(LS))||{sessions:[]}}catch{return{sessions:[]}}},
-  save:d=>localStorage.setItem(LS,JSON.stringify(d)),
+  all(){try{const d=JSON.parse(localStorage.getItem(LS));return d&&Array.isArray(d.sessions)?d:{sessions:[]}}catch{return{sessions:[]}}},
+  save(d){try{localStorage.setItem(LS,JSON.stringify(d))}catch(e){console.warn('store save failed',e.message)}}
 };
-let S=null; // current session {id,subject,created,stage,candidates[],picked,hints{},dossier,telemetry,netlog}
+function newSession(subject){return{id:'s'+Date.now().toString(36),subject:subject||'',created:nowISO(),stage:'idle',
+  candidates:[],picked:null,hints:{text:'',phone:'',location:'',school:'',links:''},dossier:null,telemetry:null,netlog:[]}}
 
-function newSession(subject){return{id:'s'+Date.now().toString(36),subject,created:now(),stage:'idle',candidates:[],picked:null,
-  hints:{text:'',phone:'',location:'',school:'',links:''},dossier:null,telemetry:null,netlog:[]}}
+let S=null, PEOPLE={}, VIEW='people', CURRENT_PERSON=null;
 
-/* ---------- network engine (browser, passive, keyless) ---------- */
+/* ---------- views ---------- */
+function show(v){
+  VIEW=v;
+  ['people','profile','run'].forEach(x=>{
+    const el=document.getElementById('view-'+x);
+    if(el) el.classList.toggle('on', x===v);
+  });
+  const tp=$('#tab-people'), tr=$('#tab-run');
+  if(tp) tp.classList.toggle('active', v==='people'||v==='profile');
+  if(tr) tr.classList.toggle('active', v==='run');
+  ghostPaint();
+}
+function ghostPaint(){
+  const g=$('#ghost'); if(!g) return;
+  const p=$('#people');
+  const empty = VIEW==='people' && p && p.dataset.empty==='1';
+  g.style.display = empty ? 'flex' : 'none';
+}
+
+/* ---------- people roster ---------- */
+async function loadPeople(){
+  try{const j=await api('api/dossiers');PEOPLE=j.dossiers||{}}
+  catch(e){PEOPLE={};console.warn('loadPeople',e.message)}
+  peoplePaint();
+}
+function peoplePaint(){
+  const el=$('#people'); if(!el) return;
+  const keys=Object.keys(PEOPLE).sort((a,b)=>String((PEOPLE[b]||{}).when||'').localeCompare(String((PEOPLE[a]||{}).when||'')));
+  if(!keys.length){
+    el.dataset.empty='1';
+    el.innerHTML='<div class="hintline">no published people yet — run FIND PEOPLE, or ask the agent to publish a dossier</div>';
+  }else{
+    el.dataset.empty='0';
+    el.innerHTML=keys.map(k=>{
+      const d=PEOPLE[k]||{};
+      const snippet=String(d.text||'').replace(/[#*`]/g,'').replace(/\s+/g,' ').trim().slice(0,150);
+      return '<div class="person" data-k="'+esc(k)+'" tabindex="0" role="button">'
+        +'<div class="pn">'+esc(d.title||k)+'</div>'
+        +'<div class="pm">'+esc(d.when||'')+(d.when?' · ':'')+'click to open dossier</div>'
+        +(snippet?'<div class="ps">'+esc(snippet)+'</div>':'')
+        +'</div>';
+    }).join('');
+    $$('#people .person').forEach(el2=>{
+      el2.onclick=()=>openPerson(el2.dataset.k);
+      el2.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openPerson(el2.dataset.k)}};
+    });
+  }
+  ghostPaint();
+}
+function imagesFrom(d){
+  const blob=[d.text||'',d.raw||'',JSON.stringify(d)].join(' ');
+  const urls=[...new Set(blob.match(/https?:\/\/[^\s"'<>)]+\.(?:png|jpe?g|webp|gif|svg)/gi)||[])];
+  if(!urls.length) return '<span class="hintline">no images in this dossier</span>';
+  return urls.slice(0,8).map(u=>'<figure><img src="'+esc(u)+'" loading="lazy" alt="" onerror="this.parentNode.style.display=\'none\'"><figcaption>'+esc(u)+'</figcaption></figure>').join('');
+}
+function openPerson(key){
+  const d=PEOPLE[key];
+  if(!d) return flash('dossier not found');
+  CURRENT_PERSON=key;
+  show('profile');
+  $('#profile-head').innerHTML='<div class="card">'
+    +'<h2>SUBJECT — '+esc(String(d.title||key).toUpperCase())+'<span class="cnt">'+esc(d.when||'')+'</span></h2>'
+    +'<div class="kv"><b>KEY</b><span>'+esc(key)+'</span><b>PUBLISHED</b><span>'+esc(d.when||'—')+'</span></div>'
+    +'<div class="rerun">'
+    +'<button data-rerun="wrong">WRONG PERSON</button>'
+    +'<button data-rerun="deeper">DEEPER DIVE</button>'
+    +'<button data-rerun="darkweb">DARKWEB</button>'
+    +'<button id="b-back">&#8592; BACK TO PEOPLE</button>'
+    +'</div></div>';
+  $('#agentdossier').innerHTML=mdToHtml(d.text||'');
+  $('#images').innerHTML=imagesFrom(d);
+  $('#artifacts').innerHTML=d.raw?'<pre class="raw">'+esc(d.raw)+'</pre>':'<span class="hintline">no raw artifacts</span>';
+  $('#rawjson').textContent=JSON.stringify(d,null,1);
+  $('#b-back').onclick=()=>{CURRENT_PERSON=null;show('people');loadPeople()};
+  $$('#profile-head [data-rerun]').forEach(b=>b.onclick=()=>rerun(key,b.dataset.rerun));
+}
+async function rerun(key,mode){
+  await postJSON('api/run',{subject:key,mode,at:nowISO()});
+  flash('re-run requested: '+mode+' — tell the agent in chat');
+}
+
+/* ---------- network engine (server-proxied, no CORS) ---------- */
 const NET={n:0,hits:0,t0:0,log:[]};
-async function gh(path){NET.n++;netlog('GET github'+path);const r=await fetch('https://api.github.com'+path);if(!r.ok)throw new Error('gh '+r.status+' '+path);return r.json()}
+function netlog(m){NET.log.unshift([Date.now()-NET.t0,m]);if(NET.log.length>40)NET.log.pop();netlogPaint()}
+function netlogPaint(){
+  const el=$('#netlog'); if(!el) return;
+  el.innerHTML=NET.log.map(l=>'<div><b>+'+l[0]+'ms</b> '+esc(l[1])+'</div>').join('');
+}
+async function gh(path){
+  NET.n++; netlog('GET '+path);
+  const j=await api('api/gh?path='+encodeURIComponent(path));
+  if(!j.ok) throw new Error(j.error||('gh '+(j.status||'fail')));
+  NET.hits++;
+  return j.data;
+}
 async function ghTry(path){try{return await gh(path)}catch{return null}}
-function netlog(m){NET.log.unshift([Date.now()-NET.t0,m]);if(NET.log.length>40)NET.log.pop();paintNet()}
-function paintNet(){const el=$('#netlog');if(el)el.innerHTML=NET.log.map(l=>`<div><b>+${l[0]}ms</b> ${esc(l[1])}</div>`).join('')}
-/* gravatar hash via crypto.subtle (async MD5) */
-async function md5hex(str){const buf=await crypto.subtle.digest("MD5",new TextEncoder().encode(str));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("")}
-async function gravatarHash(email){return md5hex(email.trim().toLowerCase())}
 
-
-/* collect CANDIDATES: broad, shallow, scored. Never auto-picks. */
 async function findCandidates(subject,depth){
   NET.n=0;NET.hits=0;NET.t0=Date.now();NET.log=[];
   const cands=[];const seen=new Set();
-  const add=c=>{const k=(c.handle||c.name||'').toLowerCase();if(k&&!seen.has(k)){seen.add(k);cands.push(c)}};
   const terms=[subject];
-  if(subject.includes(' ')){const parts=subject.split(/\s+/);if(parts.length>=2)terms.push(parts[0]+' '+parts[parts.length-1]);parts.forEach(p=>{if(p.length>2)terms.push(p)})}
-
+  if(subject.includes(' ')) subject.split(/\s+/).filter(p=>p.length>2).forEach(p=>terms.push(p));
   for(const t of [...new Set(terms)].slice(0,3)){
-    try{const r=await gh(`/search/users?q=${encodeURIComponent(t)}`);
-      for(const u of (r.items||[]).slice(0,8)){
-        if(seen.has(u.login.toLowerCase()))continue;seen.add(u.login.toLowerCase());
-        let p=null;try{p=await gh('/users/'+u.login)}catch{}
-        const score=(u.login.toLowerCase()===t.toLowerCase()?3:0)+(p?.name&&p.name.toLowerCase().includes(t.split(' ')[0].toLowerCase())?2:0);
-        add({src:'github',handle:u.login,url:`https://github.com/${u.login}`,name:p?.name||u.login,loc:p?.location||'',created:(u.created_at||'').slice(0,10),repos:p?.public_repos??'?',score});
-      }}catch(e){netlog('ERR gh search '+e.message)}
+    const r=await ghTry('/search/users?q='+encodeURIComponent(t)+'&per_page=10');
+    for(const u of (r&&r.items)||[]){
+      const k=u.login.toLowerCase(); if(seen.has(k))continue; seen.add(k);
+      const p=await ghTry('/users/'+u.login);
+      let score=0;
+      if(u.login.toLowerCase()===t.toLowerCase())score+=3;
+      if(p&&p.name&&p.name.toLowerCase().includes(t.split(' ')[0].toLowerCase()))score+=2;
+      cands.push({src:'github',handle:u.login,url:'https://github.com/'+u.login,name:(p&&p.name)||u.login,
+        loc:(p&&p.location)||'',created:((p&&p.created_at)||u.created_at||'').slice(0,10),
+        repos:(p&&p.public_repos)??'?',score});
+    }
   }
-  /* enrich top candidates: repos + commit emails (the identity gold) */
   for(const c of cands.slice(0,4)){
-    if(c.src!=='github')continue;
-    try{const repos=await gh(`/users/${c.handle}/repos?sort=pushed&per_page=5`);c.topRepos=repos.slice(0,3).map(r=>({name:r.name,pushed:(r.pushed_at||'').slice(0,10),lang:r.language}));
-      const emails=new Map();
-      for(const r of repos.slice(0,2)){const cs=await ghTry(`/repos/${c.handle}/${r.name}/commits?per_page=4`)||[];
-        for(const cm of cs){const a=cm.commit?.author;if(a?.email)emails.set(a.email,{email:a.email,name:a.name,date:(a.date||'').slice(0,10)})}}
-      c.emails=[...emails.values()];NET.hits+=c.emails.length;}catch(e){}
+    const repos=await ghTry('/users/'+c.handle+'/repos?sort=pushed&per_page=5');
+    if(!repos)continue;
+    c.topRepos=repos.slice(0,3).map(r=>({name:r.name,pushed:(r.pushed_at||'').slice(0,10),lang:r.language}));
+    const emails=new Map();
+    for(const r of repos.slice(0,2)){
+      const cs=(await ghTry('/repos/'+c.handle+'/'+r.name+'/commits?per_page=4'))||[];
+      for(const cm of cs){const a=cm.commit&&cm.commit.author;if(a&&a.email)emails.set(a.email,{email:a.email,name:a.name,date:(a.date||'').slice(0,10)})}
+    }
+    c.emails=[...emails.values()];NET.hits+=c.emails.length;
   }
-  /* hints-driven extra probes: phone→nothing keyless; location/school bias scoring; links→direct fetch */
-  const H=S?.hints||{};
-  if(H.links)for(const url of H.links.split(/[\s,]+/).filter(Boolean).slice(0,3)){try{const r=await fetch(url);netlog('GET hint-link '+url);if(r.ok)NET.hits++}catch{}}
-  /* score vs hints */
+  const H=(S&&S.hints)||{};
   for(const c of cands){
-    let s=c.score||0;const hay=(c.name+' '+(c.loc||'')+' '+(c.handle||'')).toLowerCase();
+    let s=c.score||0;
+    const hay=(c.name+' '+(c.loc||'')+' '+(c.handle||'')).toLowerCase();
     if(H.location&&hay.includes(H.location.toLowerCase()))s+=3;
     if(H.text)for(const w of H.text.toLowerCase().split(/\s+/).filter(w=>w.length>3))if(hay.includes(w))s+=1;
     c.score=s;
   }
   cands.sort((a,b)=>(b.score||0)-(a.score||0));
-  return{candidates:cands,telemetry:{requests:NET.n,hits:NET.hits,ms:Date.now()-NET.t0,cands:cands.length}};
+  return {candidates:cands,telemetry:{requests:NET.n,hits:NET.hits,ms:Date.now()-NET.t0,cands:cands.length}};
 }
 
-/* deep-dive a picked handle: full profile + repos + emails + domain CT + gravatar + archive */
 async function deepDive(handle){
   NET.n=0;NET.hits=0;NET.t0=Date.now();NET.log=[];
   const p=await gh('/users/'+handle);
-  const orgs=await ghTry(`/users/${handle}/orgs`)||[];
-  const repos=await gh(`/users/${handle}/repos?sort=pushed&per_page=30`);
+  const orgs=(await ghTry('/users/'+handle+'/orgs'))||[];
+  const repos=(await ghTry('/users/'+handle+'/repos?sort=pushed&per_page=30'))||[];
   const emails=new Map();const repoRows=[];
   for(const r of repos){
     repoRows.push({name:r.name,pushed:(r.pushed_at||'').slice(0,10),lang:r.language,desc:(r.description||'').slice(0,70)});
-    const cs=await ghTry(`/repos/${handle}/${r.name}/commits?per_per=6`.replace('per_per','per_page'))||[];
-    for(const cm of cs){const a=cm.commit?.author;if(a?.email)emails.set(a.email,{...a,date:(a.date||'').slice(0,10)})}
   }
-  const domains=new Set();emails.forEach(e=>{const d=e.email?.split('@')[1];if(d&&d!=='')domains.add(d.toLowerCase())});
+  // commit-author harvesting is the expensive part: cap it to the most recently pushed repos
+  for(const r of repos.slice(0,8)){
+    const cs=(await ghTry('/repos/'+handle+'/'+r.name+'/commits?per_page=6'))||[];
+    for(const cm of cs){const a=cm.commit&&cm.commit.author;if(a&&a.email)emails.set(a.email,{email:a.email,name:a.name,date:(a.date||'').slice(0,10)})}
+  }
+  const domains=new Set();
+  emails.forEach(e=>{const d=e.email&&e.email.split('@')[1];if(d)domains.add(d.toLowerCase())});
   const subdomains={};
-  for(const d of [...domains].slice(0,2)){
-    try{const r=await fetch(`https://crt.sh/?q=%25.${d}&output=json`);NET.n++;if(r.ok){const j=await r.json();
-      subdomains[d]=[...new Set(j.flatMap(e=>(e.name_value||'').split('\n').map(x=>x.replace('*.','').trim())))].filter(Boolean).sort();NET.hits+=subdomains[d].length}}catch{}
-  }
-  const topEmail=emails.keys().next().value;
+  const doms=[...domains].slice(0,2);
+  const crtResults=await Promise.all(doms.map(d=>
+    api('api/crt?domain='+encodeURIComponent(d)).catch(()=>null)));
+  doms.forEach((d,i)=>{
+    const j=crtResults[i];
+    if(j&&j.ok){subdomains[d]=j.names;NET.hits+=j.names.length}
+  });
+  const topEmail=[...emails.keys()][0];
   let grav=null,avatar=null;
-  if(topEmail){const h=await gravatarHash(topEmail);avatar=`https://secure.gravatar.com/avatar/${h}?d=identicon&s=160`;
-    try{const r=await fetch(`https://en.gravatar.com/${h}.json`);NET.n++;if(r.ok){const j=await r.json();const e0=(j.entry||[])[0];if(e0)grav={email:topEmail,display:e0.displayName,accounts:(e0.accounts||[]).slice(0,6)}}}catch{}}
+  if(topEmail){
+    const h=md5(topEmail.trim().toLowerCase());
+    avatar='https://secure.gravatar.com/avatar/'+h+'?d=identicon&s=160';
+    try{
+      const r=await fetch('https://en.gravatar.com/'+h+'.json');
+      if(r.ok){const j=await r.json();const e0=(j.entry||[])[0];
+        if(e0)grav={email:topEmail,display:e0.displayName,accounts:(e0.accounts||[]).slice(0,6)}}
+    }catch{}
+  }
   const langs={};repoRows.forEach(r=>{if(r.lang)langs[r.lang]=(langs[r.lang]||0)+1});
   const years={};repoRows.forEach(r=>{const y=(r.pushed||'').slice(0,4);if(y)years[y]=(years[y]||0)+1});
-  return{profile:{login:handle,name:p.name,loc:p.location,company:p.company,twitter:p.twitter_username,blog:p.blog||'',created:(p.created_at||'').slice(0,10),repos:p.public_repos,followers:p.followers,gists:p.public_gists,orgs:(orgs||[]).map(o=>o.login),updated:(p.updated_at||'').slice(0,10)},
+  return {profile:{login:handle,name:p.name,loc:p.location,company:p.company,twitter:p.twitter_username,
+      blog:p.blog||'',bio:p.bio||'',created:(p.created_at||'').slice(0,10),repos:p.public_repos,
+      followers:p.followers,gists:p.public_gists,orgs:(orgs||[]).map(o=>o.login),updated:(p.updated_at||'').slice(0,10)},
     langs,years,repoRows,emails:[...emails.values()],domains:[...domains],subdomains,grav,avatar,
     telemetry:{requests:NET.n,hits:NET.hits,ms:Date.now()-NET.t0}};
 }
 
-/* ============ render ============ */
-function badge(t,cls){const b=$('#mode');b.textContent=t;b.className='badge '+(cls||'')}
+/* ---------- render ---------- */
 function navPaint(){
   const all=store.all().sessions;
-  $('#sessions').innerHTML=all.map(s=>`<div class="ses ${S&&s.id===S.id?'active':''}" data-id="${s.id}">
-    <div class="t">${esc(s.stage==='picked'&&s.dossier?'★ '+s.subject:s.subject)}</div>
-    <div class="s">${esc(s.stage)} · ${s.candidates?.length||0} cands · ${esc((s.created||'').slice(5,10))}</div></div>`).join('')
-    ||'<div style="padding:10px;color:var(--faint);font-size:11px">no sessions</div>';
-  $$('#sessions .ses').forEach(el=>el.onclick=()=>{const s=store.all().sessions.find(x=>x.id===el.dataset.id);if(s){S=structuredClone(s);renderAll()}});
-  $('#fcount').textContent=all.length+' archived';
+  const el=$('#sessions'); if(!el) return;
+  el.innerHTML=all.map(s=>'<div class="ses '+(S&&s.id===S.id?'active':'')+'" data-id="'+s.id+'">'
+    +'<div class="t">'+esc((s.stage==='picked'&&s.dossier?'★ ':'')+(s.subject||'(untitled)'))+'</div>'
+    +'<div class="s">'+esc(s.stage)+' · '+((s.candidates&&s.candidates.length)||0)+' cands · '+esc(String(s.created||'').slice(5,10))+'</div>'
+    +'</div>').join('')||'<div class="hintline" style="padding:10px">no sessions</div>';
+  $$('#sessions .ses').forEach(el2=>el2.onclick=()=>{
+    const s=store.all().sessions.find(x=>x.id===el2.dataset.id);
+    if(s){S=structuredClone(s);renderAll();show('run')}
+  });
+  const fc=$('#fcount'); if(fc) fc.textContent=all.length+' archived';
 }
 function hintsPaint(){
-  const h=S?.hints||{};
-  $('#hints').innerHTML=`
-  <div class="hrow"><span>more info</span><input id="h-text" value="${esc(h.text||'')}" placeholder="keywords, employer, nickname…"></div>
-  <div class="hrow"><span>phone</span><input id="h-phone" value="${esc(h.phone||'')}" placeholder="+27 …"></div>
-  <div class="hrow"><span>location</span><input id="h-loc" value="${esc(h.location||'')}" placeholder="city / country"></div>
-  <div class="hrow"><span>school</span><input id="h-school" value="${esc(h.school||'')}" placeholder="institution"></div>
-  <div class="hrow"><span>links</span><input id="h-links" value="${esc(h.links||'')}" placeholder="known urls, comma separated"></div>
-  <div class="hrow"><span></span><button id="h-apply" style="width:100%">APPLY HINTS → RE-SCORE</button></div>`;
-  $('#h-apply').onclick=()=>{S.hints={text:$('#h-text').value,phone:$('#h-phone').value,location:$('#h-loc').value,school:$('#h-school').value,links:$('#h-links').value};persist();post('api/hints',S.hints);flash('hints stored — they bias the next FIND')};
+  const el=$('#hints'); if(!el) return;
+  const h=(S&&S.hints)||{};
+  el.innerHTML=
+    '<div class="hrow"><span>more info</span><input id="h-text" value="'+esc(h.text||'')+'" placeholder="keywords, employer, nickname…"></div>'
+   +'<div class="hrow"><span>phone</span><input id="h-phone" value="'+esc(h.phone||'')+'" placeholder="+27 …"></div>'
+   +'<div class="hrow"><span>location</span><input id="h-loc" value="'+esc(h.location||'')+'" placeholder="city / country"></div>'
+   +'<div class="hrow"><span>school</span><input id="h-school" value="'+esc(h.school||'')+'" placeholder="institution"></div>'
+   +'<div class="hrow"><span>links</span><input id="h-links" value="'+esc(h.links||'')+'" placeholder="known urls, comma separated"></div>'
+   +'<div class="hrow"><span></span><button id="h-apply" style="width:100%">APPLY HINTS → RE-SCORE</button></div>';
+  $('#h-apply').onclick=async()=>{
+    if(!S) S=newSession($('#subject').value.trim());
+    S.hints={text:$('#h-text').value,phone:$('#h-phone').value,location:$('#h-loc').value,
+             school:$('#h-school').value,links:$('#h-links').value};
+    persist();
+    await postJSON('api/hints',S.hints);
+    if(S.candidates&&S.candidates.length){
+      const H=S.hints;
+      for(const c of S.candidates){
+        let s=c.score||0;
+        const hay=(c.name+' '+(c.loc||'')+' '+(c.handle||'')).toLowerCase();
+        if(H.location&&hay.includes(H.location.toLowerCase()))s+=3;
+        if(H.text)for(const w of H.text.toLowerCase().split(/\s+/).filter(w=>w.length>3))if(hay.includes(w))s+=1;
+        c.score=s;
+      }
+      S.candidates.sort((a,b)=>(b.score||0)-(a.score||0));
+      candPaint();
+    }
+    flash('hints stored — they bias the next FIND');
+  };
 }
-async function candPaint(){
-  const el=$('#cands');if(!el)return;
-  if(!S.candidates?.length){el.innerHTML='<div style="color:var(--faint);font-size:11px;padding:8px">no candidates yet — FIND PEOPLE first</div>';return}
-  let htmlOut='';
-  for(const [idx,c] of S.candidates.entries()){const i=idx;
+function candPaint(){
+  const el=$('#cands'); if(!el) return;
+  if(!S||!S.candidates||!S.candidates.length){
+    el.innerHTML='<div class="hintline">no candidates yet — FIND PEOPLE first</div>';return;
+  }
+  let out='';
+  S.candidates.forEach((c,i)=>{
     const code='P'+String(i+1).padStart(2,'0');
-    const gv=(c.emails&&c.emails[0])?await gravatarHash(c.emails[0].email):null;
     c.code=code;
-    const gravatar=c.emails?.[0]?`https://secure.gravatar.com/avatar/${await gravatarHash(c.emails[0].email)}?d=identicon&s=80`:''; 
-    const row=`<div class="cand ${S.picked&&S.picked.handle===c.handle?'pick':''}" data-i="${i}">
-      ${gravatar?`<img src="${gravatar}">`:''}
-      <div class="body">
-        <div class="nm">${esc(c.name||c.handle)} <span class="score">match ${c.score||0}</span></div>
-        <div class="meta">@${esc(c.handle)} · ${esc(c.loc||'loc ?')} · since ${esc((c.created||'?').slice(0,4))} · ${esc(c.repos??'?')} repos</div>
-        ${c.topRepos?.length?`<div class="meta" style="color:#6f6f76">top: ${c.topRepos.map(r=>esc(r.name)).join(' · ')}</div>`:''}
-        ${c.emails?.length?`<div class="meta">${c.emails.slice(0,2).map(e=>esc(e.email)).join(' · ')} <span style="color:var(--faint)">(${c.emails.length})</span></div>`:''}
-      </div>
-      <div style="text-align:right"><div class="code">${code}</div><button data-pick="${i}" style="font-size:10px;padding:2px 8px;margin-top:4px">PICK</button></div>
-    </div>`;htmlOut+=row;}
-  el.innerHTML=htmlOut;
-  $$('#cands [data-pick]').forEach(b=>b.onclick=async()=>{
-    const i=+b.dataset.pick;S.picked=S.candidates[i];
-    badge('DEEP DIVING','warn');
-    post('api/pick',{code:S.picked.code,handle:S.picked.handle});try{S.dossier=await deepDive(S.picked.handle);S.stage='picked';persist();renderAll();flash('deep dive complete — '+S.picked.handle)}
-    catch(e){badge('ERROR','bad');flash(e.message)}
+    const gv=(c.emails&&c.emails[0])?'https://secure.gravatar.com/avatar/'+md5(c.emails[0].email.trim().toLowerCase())+'?d=identicon&s=80':'';
+    out+='<div class="cand '+(S.picked&&S.picked.handle===c.handle?'pick':'')+'" data-i="'+i+'">'
+      +(gv?'<img src="'+gv+'" alt="">':'')
+      +'<div class="body">'
+      +'<div class="nm">'+esc(c.name||c.handle)+' <span class="score">match '+(c.score||0)+'</span></div>'
+      +'<div class="meta">@'+esc(c.handle)+' · '+esc(c.loc||'loc ?')+' · since '+esc(String(c.created||'?').slice(0,4))+' · '+esc(c.repos??'?')+' repos</div>'
+      +(c.topRepos&&c.topRepos.length?'<div class="meta dim">top: '+c.topRepos.map(r=>esc(r.name)).join(' · ')+'</div>':'')
+      +(c.emails&&c.emails.length?'<div class="meta">'+c.emails.slice(0,2).map(e=>esc(e.email)).join(' · ')+' <span class="dim">('+c.emails.length+')</span></div>':'')
+      +'</div>'
+      +'<div class="candright"><div class="code">'+code+'</div><button data-pick="'+i+'">PICK</button></div>'
+      +'</div>';
   });
+  el.innerHTML=out;
+  $$('#cands [data-pick]').forEach(b=>b.onclick=()=>pick(+b.dataset.pick));
+}
+async function pick(i){
+  const c=S&&S.candidates&&S.candidates[i];
+  if(!c) return;
+  S.picked=c; badge('DEEP DIVING','warn');
+  const host=$('#runDossier');
+  if(host) host.innerHTML='<div class="hintline">deep diving @'+esc(c.handle)+' — profile, repos, commit emails, certificate transparency…</div>';
+  await postJSON('api/pick',{code:c.code,handle:c.handle,subject:S.subject});
+  try{
+    S.dossier=await deepDive(c.handle);
+    S.stage='picked'; persist(); renderAll(); badge('DEEP DIVE OK','ok');
+    flash('deep dive complete — '+c.handle);
+  }catch(e){badge('ERROR','bad');flash('deep dive failed: '+e.message);dossierPaint()}
 }
 function telPaint(){
-  const t=S?.telemetry||S?.dossier?.telemetry;const el='#telemetry';
-  if(!t){$(el).innerHTML='<span style="color:var(--faint)">no run yet</span>';return}
-  const pct=Math.min(100,Math.round((t.hits||0)/Math.max(1,(t.requests||1))*100));
-  $(el).innerHTML=`
-  ${['requests|'+t.requests,'artifacts|'+t.hits,'candidates|'+(S?.candidates?.length||0)].map(r=>{const[k,v]=r.split('|');return`<div class="trow"><span>${k}</span><div class="bar"><i style="width:${Math.min(100,v*4)}%"></i></div><span>${v}</span></div>`}).join('')}
-  <div class="trow"><span>wall clock</span><div class="bar"><i style="width:${pct}%"></i></div><span>${((t.ms||0)/1000).toFixed(1)}s</span></div>`;
+  const el=$('#telemetry'); if(!el) return;
+  const t=(S&&S.telemetry)||(S&&S.dossier&&S.dossier.telemetry);
+  if(!t){el.innerHTML='<span class="hintline">no run yet</span>';return}
+  const rows=[['requests',t.requests||0],['artifacts',t.hits||0],['candidates',(S&&S.candidates&&S.candidates.length)||0]];
+  el.innerHTML=rows.map(r=>'<div class="trow"><span>'+r[0]+'</span><div class="bar"><i style="width:'+Math.min(100,r[1]*4)+'%"></i></div><span>'+r[1]+'</span></div>').join('')
+    +'<div class="trow"><span>wall clock</span><div class="bar"><i style="width:100%"></i></div><span>'+((t.ms||0)/1000).toFixed(1)+'s</span></div>';
 }
 function dossierPaint(){
-  const el='#dossier';const D=S?.dossier;
-  if(!D){$(el).innerHTML='<div id="empty">no deep-dive yet — pick a candidate code</div>';return}
-  const P=D.profile;let rows='';
-  D.repoRows.forEach(r=>rows+=`<tr><td>repo</td><td>${esc(r.name)}</td><td>${esc(r.lang||'—')}</td><td>${esc(r.pushed)}</td><td>${esc(r.desc||'')}</td></tr>`);
-  D.emails.forEach(e=>rows+=`<tr><td>email</td><td colspan=2>${esc(e.email)} <span style="color:var(--dim)">${esc(e.name||'')}</span></td><td>${esc(e.date||'')}</td><td>commit author</td></tr>`);
-  Object.entries(D.subdomains||{}).forEach(([d,list])=>{rows+=`<tr><td>domain</td><td colspan=2><b>${esc(d)}</b></td><td>${list.length} subdomains</td><td>crt.sh aggregate</td></tr>`;
-    list.slice(0,8).forEach(x=>rows+=`<tr><td>dns</td><td colspan=3>${esc(x)}</td><td>crt.sh @${esc(d)}</td></tr>`);});
-  (D.grav?.accounts||[]).forEach(a=>rows+=`<tr><td>social</td><td colspan=3><a href="${esc(a.url)}">${esc(a.domain)}</a></td><td>gravatar</td></tr>`);
-  $(el).innerHTML=`
-  <div class="card"><h2>SUBJECT — ${esc(P.name||S.picked.handle)}<span class="cnt">@${esc(P.login)}</span></h2>
-    ${D.avatar?`<img class="avatar-lg" src="${D.avatar}">`:''}
-    <div class="kv"><b>HANDLE</b><span>${esc(P.login)}</span><b>NAME</b><span>${esc(P.name||'—')}</span></div>
-    <div class="kv" style="margin-top:4px"><b>LOCATION</b><span>${esc(P.loc||'—')}</span><b>BIO</b><span>${esc((P.bio||'—').slice(0,80))}</span></div>
-    <div class="kv" style="margin-top:4px"><b>ON GITHUB SINCE</b><span>${esc(P.created)} <span style="color:var(--faint)">(updated ${esc(P.updated||'')})</span></span><b>REPOS · GISTS</b><span>${P.repos} · ${P.gists??0}</span></div>
-    <div class="kv" style="margin-top:4px"><b>FOLLOWERS</b><span>${P.followers}</span><b>COMPANY</b><span>${esc(P.company||'—')}</span></div>
-    <div class="kv" style="margin-top:4px"><b>ORGS</b><span>${esc((P.orgs||[]).join(', ')||'—')}</span><b>TWITTER</b><span>${esc(P.twitter?'@'+P.twitter:'—')}</span></div>
-    <div class="kv" style="margin-top:4px"><b>BLOG</b><span>${P.blog?`<a href="${esc(P.blog)}">${esc(P.blog)}</a>`:'—'}</span><b>LOCATION</b><span>${esc(P.loc||'—')}</span></div>
-    <div class="tags"><span class="tag ok">picked via ${esc(S.picked.code||'')}</span><span class="tag">${esc(S.stage)}</span>
-      <span class="tag warn">${D.emails.length} emails</span><span class="tag">${Object.values(D.subdomains||{}).flat().length} hosts</span></div>
-  </div>
-  <div class="card"><h2>LANGUAGE MIX<span class="cnt">repos by primary language</span></h2>
-    ${Object.entries(D.langs||{}).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([l,n])=>`<div class="trow"><span>${esc(l)}</span><div class="bar"><i style="width:${Math.round(100*n/Math.max(1,(D.langs&&Object.values(D.langs).reduce((x,y)=>x+y,0))||1))}%"></i></div><span>${n}</span></div>`).join('')||'<span style="color:var(--faint);font-size:11px">none</span>'}
-  </div>
-  <div class="card"><h2>COMMIT ACTIVITY<span class="cnt">push years across harvested repos</span></h2>
-    ${Object.entries(D.years||{}).sort().map(([y,n])=>`<div class="trow"><span>${y}</span><div class="bar"><i style="width:${Math.round(100*n/Math.max(1,(D.years&&Object.values(D.years).reduce((x,y)=>x+y,0))||1))}%"></i></div><span>${n}</span></div>`).join('')||'<span style="color:var(--faint);font-size:11px">none</span>'}
-  </div>
-  <div class="card"><h2>DOSSIER — ARTIFACTS<span class="cnt">${D.emails.length} emails · ${Object.values(D.subdomains||{}).flat().length} hosts</span></h2>
-  <table><thead><tr><th>CLASS</th><th>ARTIFACT</th><th>META</th><th>DATE</th><th>SOURCE</th></tr></thead><tbody>${rows||'<tr><td colspan=5 style="color:var(--faint)">none</td></tr>'}</tbody></table></div>
-  <div class="card"><h2>AGENT DOSSIER — ANALYSIS<span class="cnt">published by the agent</span></h2><div id="agentdossier" style="font-size:12px;color:#b9b9b9">loading…</div></div>
-  <div class="card"><h2>RAW LAYER JSON</h2><pre style="font-size:10px;color:#8a8a8a;white-space:pre-wrap;max-height:180px;overflow:auto">${esc(JSON.stringify({emails:D.emails,domains:D.domains,subdogs:undefined,subdomains:D.subdomains},null,1).slice(0,2500))}</pre></div>`;
-}
-async function renderAgentDossier(){
-  try{const r=await fetch('api/dossier');const j=await r.json();const el=document.querySelector('#agentdossier');if(!el)return;
-    const txt=(j.dossier&&j.dossier.text)||'';
-    if(!txt){el.innerHTML='<span style="color:var(--faint)">no dossier published yet</span>';return}
-    const html=txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/^# (.*)$/gm,'<div style="color:#e5484d;font-size:14px;letter-spacing:1px;margin:8px 0 4px">$1</div>')
-      .replace(/^## (.*)$/gm,'<div style="color:#e5484d;margin:7px 0 3px">$1</div>')
-      .replace(/\*\*(.*?)\*\*/g,'<b style="color:#ddd">$1</b>')
-      .replace(/^\`(.*)\`$/gm,'<code style="color:#e5484d">$1</code>')
-      .replace(/\b(https?:\/\/[^\s<]+)\b/g,'<a href="$1">$1</a>')
-      .replace(/\n/g,'<br>');
-    el.innerHTML=html;
-  }catch(e){}
+  const el=$('#runDossier'); if(!el) return;
+  const D=S&&S.dossier;
+  if(!D){el.innerHTML='<div class="hintline">no deep-dive yet — pick a candidate code</div>';return}
+  const P=D.profile||{};
+  let rows='';
+  (D.repoRows||[]).forEach(r=>{rows+='<tr><td>repo</td><td>'+esc(r.name)+'</td><td>'+esc(r.lang||'—')+'</td><td>'+esc(r.pushed)+'</td><td>'+esc(r.desc||'')+'</td></tr>'});
+  (D.emails||[]).forEach(e=>{rows+='<tr><td>email</td><td colspan=2>'+esc(e.email)+' <span class="dim">'+esc(e.name||'')+'</span></td><td>'+esc(e.date||'')+'</td><td>commit author</td></tr>'});
+  Object.entries(D.subdomains||{}).forEach(([d,list])=>{
+    rows+='<tr><td>domain</td><td colspan=2><b>'+esc(d)+'</b></td><td>'+list.length+' subdomains</td><td>crt.sh</td></tr>';
+    list.slice(0,8).forEach(x=>{rows+='<tr><td>dns</td><td colspan=3>'+esc(x)+'</td><td>crt.sh @'+esc(d)+'</td></tr>'});
+  });
+  ((D.grav&&D.grav.accounts)||[]).forEach(a=>{rows+='<tr><td>social</td><td colspan=3><a href="'+esc(a.url)+'" target="_blank" rel="noopener">'+esc(a.domain)+'</a></td><td>gravatar</td></tr>'});
+  el.innerHTML='<div class="card"><h2>SUBJECT — '+esc(P.name||(S.picked&&S.picked.handle)||'')+'<span class="cnt">@'+esc(P.login||'')+'</span></h2>'
+    +(D.avatar?'<img class="avatar-lg" src="'+esc(D.avatar)+'" alt="">':'')
+    +'<div class="kv"><b>HANDLE</b><span>'+esc(P.login||'')+'</span><b>NAME</b><span>'+esc(P.name||'—')+'</span></div>'
+    +'<div class="kv" style="margin-top:4px"><b>LOCATION</b><span>'+esc(P.loc||'—')+'</span><b>BIO</b><span>'+esc((P.bio||'—').slice(0,80))+'</span></div>'
+    +'<div class="kv" style="margin-top:4px"><b>SINCE</b><span>'+esc(P.created||'')+' <span class="dim">(updated '+esc(P.updated||'')+')</span></span><b>REPOS · GISTS</b><span>'+esc(P.repos??'?')+' · '+esc(P.gists??0)+'</span></div>'
+    +'<div class="kv" style="margin-top:4px"><b>FOLLOWERS</b><span>'+esc(P.followers??'?')+'</span><b>COMPANY</b><span>'+esc(P.company||'—')+'</span></div>'
+    +'<div class="kv" style="margin-top:4px"><b>ORGS</b><span>'+esc((P.orgs||[]).join(', ')||'—')+'</span><b>TWITTER</b><span>'+esc(P.twitter?'@'+P.twitter:'—')+'</span></div>'
+    +'<div class="kv" style="margin-top:4px"><b>BLOG</b><span>'+(P.blog?'<a href="'+esc(P.blog)+'" target="_blank" rel="noopener">'+esc(P.blog)+'</a>':'—')+'</span></div>'
+    +'<div class="tags"><span class="tag ok">picked via '+esc((S.picked&&S.picked.code)||'')+'</span><span class="tag">'+esc(S.stage)+'</span>'
+    +'<span class="tag warn">'+(D.emails||[]).length+' emails</span><span class="tag">'+Object.values(D.subdomains||{}).flat().length+' hosts</span></div></div>'
+    +'<div class="card"><h2>LANGUAGE MIX<span class="cnt">repos by primary language</span></h2>'
+    +(Object.entries(D.langs||{}).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([l,n])=>{
+      const tot=Object.values(D.langs||{}).reduce((x,y)=>x+y,0)||1;
+      return '<div class="trow"><span>'+esc(l)+'</span><div class="bar"><i style="width:'+Math.round(100*n/tot)+'%"></i></div><span>'+n+'</span></div>';
+    }).join('')||'<span class="hintline">none</span>')+'</div>'
+    +'<div class="card"><h2>COMMIT ACTIVITY<span class="cnt">push years</span></h2>'
+    +(Object.entries(D.years||{}).sort().map(([y,n])=>{
+      const tot=Object.values(D.years||{}).reduce((x,y)=>x+y,0)||1;
+      return '<div class="trow"><span>'+esc(y)+'</span><div class="bar"><i style="width:'+Math.round(100*n/tot)+'%"></i></div><span>'+n+'</span></div>';
+    }).join('')||'<span class="hintline">none</span>')+'</div>'
+    +'<div class="card"><h2>ARTIFACTS<span class="cnt">'+(D.emails||[]).length+' emails · '+Object.values(D.subdomains||{}).flat().length+' hosts</span></h2>'
+    +'<table><thead><tr><th>CLASS</th><th>ARTIFACT</th><th>META</th><th>DATE</th><th>SOURCE</th></tr></thead><tbody>'
+    +(rows||'<tr><td colspan=5 class="hintline">none</td></tr>')+'</tbody></table></div>';
 }
 function renderAll(){
-  hintsPaint();candPaint();telPaint();dossierPaint();renderAgentDossier();navPaint();
-  $('#subject').value=S?.subject||'';
+  navPaint(); hintsPaint(); candPaint(); telPaint(); dossierPaint(); netlogPaint();
+  const sub=$('#subject'); if(sub&&S) sub.value=S.subject||'';
 }
 
-/* ============ actions ============ */
-function persist(){const all=store.all();const i=all.sessions.findIndex(s=>s.id===S.id);
-  if(i>=0)all.sessions[i]=S;else all.sessions.push(S);store.save(all);navPaint()}
-
+/* ---------- actions ---------- */
+function persist(){
+  if(!S) return;
+  const all=store.all();
+  const i=all.sessions.findIndex(s=>s.id===S.id);
+  if(i>=0) all.sessions[i]=S; else all.sessions.push(S);
+  store.save(all); navPaint();
+}
 async function doFind(){
-  const subject=$('#subject').value.trim();if(!subject)return flash('enter subject');
-  S=S&&S.subject===subject?S:newSession(subject);S.subject=subject;S.stage='candidates';badge('SCANNING','warn');
-  show('run');ensureRunShell();hintsPaint();
-  try{const r=await findCandidates(subject,$('#depth').value);
-    S.candidates=r.candidates;S.telemetry=r.telemetry;S.netlog=NET.log;persist();renderAll();badge('CANDIDATES','ok');
-    flash(`${r.candidates.length} candidates — copy a P-code to the agent`);
+  const subject=$('#subject').value.trim();
+  if(!subject) return flash('enter a subject');
+  S=(S&&S.subject===subject)?S:newSession(subject);
+  S.subject=subject; S.stage='candidates';
+  badge('SCANNING','warn'); show('run');
+  try{
+    const r=await findCandidates(subject,$('#depth').value);
+    S.candidates=r.candidates; S.telemetry=r.telemetry; S.netlog=NET.log.slice();
+    persist(); renderAll(); badge('CANDIDATES','ok');
+    flash(r.candidates.length+' candidates — copy a P-code to the agent');
+  }catch(e){badge('ERROR','bad');flash('collect failed: '+e.message)}
+}
+async function noneMatch(){
+  if(!S) return flash('run FIND PEOPLE first');
+  S.stage='none'; persist();
+  await postJSON('api/pick',{code:'NONE',subject:S.subject});
+  badge('NONE','warn'); flash('NONE recorded — tell the agent in chat');
+}
+async function saveCurrent(){
+  if(!S) return flash('nothing to save');
+  persist();
+  await postJSON('api/session',S);
+  flash('saved');
+}
+async function delCurrent(){
+  if(VIEW==='profile'&&CURRENT_PERSON){
+    await api('api/dossiers?subject='+encodeURIComponent(CURRENT_PERSON),{method:'DELETE'}).catch(()=>{});
+    delete PEOPLE[CURRENT_PERSON];
+    CURRENT_PERSON=null; peoplePaint(); show('people'); flash('dossier deleted');
+    return;
   }
-  catch(e){badge('ERROR','bad');$('#main').innerHTML=`<div id="empty">COLLECT ERROR ${esc(e.message)}</div>`}
+  if(!S) return flash('nothing to delete');
+  const all=store.all();
+  all.sessions=all.sessions.filter(x=>x.id!==S.id);
+  store.save(all); S=null; renderAll(); flash('session deleted');
 }
-function ensureRunShell(){/* legacy no-op */}
-function mainShellUnused(){return`
-  <div class="card"><h2>CANDIDATES — PICK A CODE<span class="cnt">give the code to the agent</span></h2><div id="cands"></div>
-    <div style="margin-top:8px;font-size:11px;color:var(--dim)">reply in chat with a <code class="codechip">P##</code> to deep-dive, or NONE.</div></div>
-  <div class="card"><h2>REFINE — MORE ABOUT THE RIGHT PERSON</h2><div id="hints"></div></div>
-  <div class="card"><h2>TELEMETRY</h2><div id="telemetry"></div><div id="netlog"></div></div>
-  <div class="card"><h2>DOSSIER</h2><div id="dossier"><div id="empty">pick a candidate to deep-dive</div></div></div>`}
+function newSessionUI(){
+  S=newSession(''); S.stage='idle';
+  const sub=$('#subject'); if(sub) sub.value='';
+  renderAll(); show('people'); flash('new session');
+}
+function exportJSON(){
+  if(!S) return flash('nothing to export');
+  const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b); a.download='osint-'+S.id+'.json'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
 
+/* ---------- wiring ---------- */
 $('#b-run').onclick=doFind;
-$('#b-new').onclick=()=>{S=newSession('');S.stage='idle';$('#main').innerHTML=GHOST_NEW;renderAll()}
-$('#b-save').onclick=()=>{if(!S)return flash('nothing');persist();flash('saved')};
-$('#b-del').onclick=()=>{if(!S)return;const all=store.all();all.sessions=all.sessions.filter(x=>x.id!==S.id);store.save(all);S=null;$('#main').innerHTML='<div id="empty">deleted.</div>';navPaint()};
-$('#b-export').onclick=()=>{if(!S)return flash('nothing');const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='osint-'+S.id+'.json';a.click()};
-
-/* restore last or idle */
-/* ---- views ---- */
-function show(view){['people','profile','run'].forEach(v=>{
-  const el=document.getElementById('view-'+v);if(el)el.classList.toggle('on',v===view)});
-  document.getElementById('tab-people').classList.toggle('active',view==='people');
-  document.getElementById('tab-run').classList.toggle('active',view==='run');
-}
+$('#b-none').onclick=noneMatch;
+$('#b-save').onclick=saveCurrent;
+$('#b-del').onclick=delCurrent;
+$('#b-new').onclick=newSessionUI;
+$('#b-export').onclick=exportJSON;
+$('#b-refresh').onclick=()=>{loadPeople();flash('roster refreshed')};
 $('#tab-people').onclick=()=>{show('people');loadPeople()};
 $('#tab-run').onclick=()=>show('run');
+$('#subject').addEventListener('keydown',e=>{if(e.key==='Enter')doFind()});
 
-/* ---- PEOPLE roster: every subject with a published dossier ---- */
-let PEOPLE={};
-async function loadPeople(){
-  try{const r=await fetch('api/dossiers');const j=await r.json();PEOPLE=j.dossiers||{}}catch{PEOPLE={}}
-  // merge any localStorage-session subjects that have picks (dossier pending publish)
-  const el=document.getElementById('people');
-  const keys=Object.keys(PEOPLE).sort();
-  if(!keys.length){el.innerHTML='<div style="color:var(--faint);font-size:11px;padding:8px">no published people yet</div>';return}
-  el.innerHTML=keys.map(k=>{
-    const d=PEOPLE[k];const sub=d.dossier&&d.dossier.title||k;
-    return`<div class="person" data-k="${esc(k)}"><div class="pn">${esc(sub)}</div><div class="pm">${esc((d.dossier&&d.dossier.when)||'')} · click to open dossier</div></div>`}).join('');
-  $$('#people .person').forEach(el=>el.onclick=()=>openPerson(el.dataset.k));
-}
-function openPerson(key){
-  const wrap=PEOPLE[key];if(!wrap)return;
-  const d=wrap.dossier||wrap;
-  show('profile');
-  document.getElementById('profile-head').innerHTML=`<div class="card"><h2>SUBJECT — ${esc((d.title||key).toUpperCase())}<span class="cnt">dossier</span></h2></div>`;
-  renderAgentDossierInto(document.querySelector('#view-profile #agentdossier'),d.text||'');
-  document.getElementById('artifacts').innerHTML=`<pre style="font-size:11px;color:#9a9a9a;white-space:pre-wrap">${esc(d.raw||JSON.stringify(d,null,1).slice(0,3000))}</pre>`;
-  document.getElementById('rawjson').textContent=JSON.stringify(d,null,1).slice(0,4000);
-}
-async function renderAgentDossierInto(el,txt){
-  if(!el)return;
-  if(!txt){el.innerHTML='<span style="color:var(--faint)">no dossier published yet</span>';return}
-  const html=txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/^# (.*)$/gm,'<div style="color:#e5484d;font-size:14px;letter-spacing:1px;margin:8px 0 4px">$1</div>')
-    .replace(/^## (.*)$/gm,'<div style="color:#e5484d;margin:7px 0 3px">$1</div>')
-    .replace(/\*\*(.*?)\*\*/g,'<b style="color:#ddd">$1</b>')
-    .replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1">$1</a>')
-.replace(/\\n/g,'<br>');
-  el.innerHTML=html;
-}
-async function renderAgentDossier(){const el=document.querySelector('#agentdossier');if(!el)return;
-  try{const r=await fetch('api/dossier');const j=await r.json();await renderAgentDossierInto(el,(j.dossier&&j.dossier.text)||'')}catch(e){}}
-
-function boot(){
+/* ---------- boot ---------- */
+async function boot(){
+  const ds=$('#datestamp');
+  if(ds){ds.textContent=nowISO();setInterval(()=>{ds.textContent=nowISO()},30000)}
   const all=store.all().sessions;
-  if(all.length){S=structuredClone(all[all.length-1]);renderAll()}else{S=null;navPaint()}
-  show('people');loadPeople();
+  if(all.length) S=structuredClone(all[all.length-1]);
+  renderAll();
+  await loadPeople();
+  show('people');
+  badge('READY','ok');
 }
-window.addEventListener('DOMContentLoaded',boot);
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
+else boot();
 </script>
-<div id="jserr" style="display:none;position:fixed;bottom:60px;left:12px;color:var(--bad);font-size:11px;max-width:60%;z-index:99"></div></body>
+</body>
 </html>
