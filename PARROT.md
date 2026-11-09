@@ -29,6 +29,20 @@ Branch `symi-parrot`. Fork of stock `@symerian/symi` 2026.12.87
    atomic write, validated restore in constructor, save-hooks on define/confirm/panel
    (markers `symiparrot#3`; backup: `index.js.pre-parrot3`)
 
+## OSINT capability
+- **`osint` skill** — `parrot-home/skills/osint/SKILL.md` (deployed to
+  `~/.symi-jai-parrot/skills/osint/`). Rewritten against verified reality: the
+  intelligence cycle, layer checklist, pivot-chain playbooks, corroboration and
+  confidence grading, and an arsenal split into *installed tools*, *keyless APIs
+  proven reachable*, *GitHub token exploitation*, and *keyed services not configured*.
+  Every command in it was executed on this box before being written down.
+- **OSINT DARK app** — `apps/osint-dark/` (deployed to `~/SYMI-WS/osint-dark/`).
+  Readable output surface: structured dossier schema, per-person profile pages,
+  candidates-first `P##` workflow, hints, telemetry. Served at
+  `https://ghost.taild6f361.ts.net/osint/` via `onsint`.
+- **GitHub token** — `gh auth token` gives 5000 req/h plus commit and code search;
+  the skill treats this as the highest-yield source on the box.
+
 ## Operational notes
 - client-access state is origin-pinned: boot web with
   `--public-origin https://ghost.taild6f361.ts.net` (matches copied state)
