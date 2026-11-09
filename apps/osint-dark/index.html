@@ -345,10 +345,25 @@ function dossierPaint(){
   </div>
   <div class="card"><h2>DOSSIER — ARTIFACTS<span class="cnt">${D.emails.length} emails · ${Object.values(D.subdomains||{}).flat().length} hosts</span></h2>
   <table><thead><tr><th>CLASS</th><th>ARTIFACT</th><th>META</th><th>DATE</th><th>SOURCE</th></tr></thead><tbody>${rows||'<tr><td colspan=5 style="color:var(--faint)">none</td></tr>'}</tbody></table></div>
+  <div class="card"><h2>AGENT DOSSIER — ANALYSIS<span class="cnt">published by the agent</span></h2><div id="agentdossier" style="font-size:12px;color:#b9b9b9">loading…</div></div>
   <div class="card"><h2>RAW LAYER JSON</h2><pre style="font-size:10px;color:#8a8a8a;white-space:pre-wrap;max-height:180px;overflow:auto">${esc(JSON.stringify({emails:D.emails,domains:D.domains,subdogs:undefined,subdomains:D.subdomains},null,1).slice(0,2500))}</pre></div>`;
 }
+async function renderAgentDossier(){
+  try{const r=await fetch('api/dossier');const j=await r.json();const el=document.querySelector('#agentdossier');if(!el)return;
+    const txt=(j.dossier&&j.dossier.text)||'';
+    if(!txt){el.innerHTML='<span style="color:var(--faint)">no dossier published yet</span>';return}
+    const html=txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/^# (.*)$/gm,'<div style="color:#e5484d;font-size:14px;letter-spacing:1px;margin:8px 0 4px">$1</div>')
+      .replace(/^## (.*)$/gm,'<div style="color:#e5484d;margin:7px 0 3px">$1</div>')
+      .replace(/\*\*(.*?)\*\*/g,'<b style="color:#ddd">$1</b>')
+      .replace(/^\`(.*)\`$/gm,'<code style="color:#e5484d">$1</code>')
+      .replace(/\b(https?:\/\/[^\s<]+)\b/g,'<a href="$1">$1</a>')
+      .replace(/\n/g,'<br>');
+    el.innerHTML=html;
+  }catch(e){}
+}
 function renderAll(){
-  hintsPaint();candPaint();telPaint();dossierPaint();navPaint();
+  hintsPaint();candPaint();telPaint();dossierPaint();renderAgentDossier();navPaint();
   $('#subject').value=S?.subject||'';
 }
 
