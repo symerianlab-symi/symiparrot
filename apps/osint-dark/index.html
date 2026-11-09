@@ -39,8 +39,8 @@ button:disabled{opacity:.45;cursor:default}
 
 #wrap{flex:1;display:grid;grid-template-columns:270px 1fr;min-height:0}
 nav#nav{border-right:1px solid var(--line);background:#181818;display:flex;flex-direction:column;min-height:0}
-.navhead{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--line)}
-.tabbtn{flex:1;font-size:10px;letter-spacing:1.5px;padding:5px 4px}
+.navhead{display:flex;gap:5px;padding:8px;border-bottom:1px solid var(--line)}
+.tabbtn{flex:1;font-size:9px;letter-spacing:1px;padding:5px 3px}
 .tabbtn.active{border-color:var(--acc);color:var(--txt-hi);background:var(--acc-bg)}
 #sessions{flex:1;overflow-y:auto}
 .ses{padding:7px 12px;border-bottom:1px solid #202020;cursor:pointer;font-size:12px}
@@ -111,6 +111,10 @@ main{overflow-y:auto;padding:14px 18px;min-width:0}
 .phead-r{display:flex;gap:7px;flex-wrap:wrap;align-items:flex-start}
 .phead-r button{font-size:11px}
 .psummary{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--txt);line-height:1.55}
+.qblock{margin-top:10px;padding:9px 11px;background:#0d0d10;border-left:2px solid var(--acc);font-size:11px}
+.qblock .ql{color:var(--faint);font-size:9px;letter-spacing:1px}
+.qblock .qv{color:var(--txt);margin-bottom:5px}
+.qblock .qv:last-child{margin-bottom:0}
 
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--faint);margin-right:5px;vertical-align:middle}
 .dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--acc)}
@@ -131,6 +135,37 @@ main{overflow-y:auto;padding:14px 18px;min-width:0}
 .kvp span{color:var(--txt);word-break:break-word}
 .copybtn{font-size:9px;padding:1px 7px;margin-left:8px;vertical-align:middle}
 
+/* coverage matrix */
+.cov{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:6px}
+.covitem{border:1px solid var(--line);padding:6px 9px;font-size:11px;display:flex;justify-content:space-between;align-items:center;background:#0d0d10}
+.covitem .cn{color:var(--txt);letter-spacing:.5px}
+.covitem .cv{color:var(--faint);font-size:10px}
+.covitem.done{border-left:2px solid var(--ok)}
+.covitem.partial{border-left:2px solid var(--warn)}
+.covitem.gap{border-left:2px solid var(--acc)}
+.covitem.gap .cn{color:var(--dim)}
+
+/* pivot chains */
+.pivot{border-left:2px solid var(--acc);padding:7px 11px;margin-bottom:7px;background:#0d0d10}
+.pivot .ph{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.pivot .pfrom{color:var(--dim);font-size:10px;letter-spacing:.5px}
+.pivot .parrow{color:var(--acc);font-size:11px}
+.pivot .pvia{color:var(--txt-hi);font-size:11px}
+.pivot .pto{color:var(--txt);font-size:12px;margin-top:3px;word-break:break-word}
+.pivot .pconf{color:var(--faint);font-size:10px;margin-top:2px}
+
+/* ledger */
+.ledgerbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.ledgerbar select,.ledgerbar input{font-size:11px;padding:4px 8px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;color:var(--faint);font-weight:400;border-bottom:1px solid var(--line2);padding:4px 7px;letter-spacing:1px;font-size:9px}
+td{border-bottom:1px solid #1e1e24;padding:4px 7px;vertical-align:top;color:#bdbdbd}
+tr:hover td{background:#1a1a20}
+td.lay{color:var(--dim);white-space:nowrap}
+td.art{color:var(--txt);word-break:break-word}
+td.src{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.conf{white-space:nowrap}
+
 /* timeline */
 .tl{position:relative;padding-left:16px}
 .tl::before{content:'';position:absolute;left:4px;top:4px;bottom:4px;width:1px;background:var(--line2)}
@@ -140,10 +175,16 @@ main{overflow-y:auto;padding:14px 18px;min-width:0}
 .tli .te{color:var(--txt)}
 .tli .ts{color:var(--faint);font-size:10px;margin-top:1px}
 
-/* gaps */
+/* gaps / negatives / probes */
 .gaps{display:flex;flex-direction:column;gap:5px}
 .gap{font-size:11px;color:var(--dim);padding-left:14px;position:relative}
 .gap::before{content:'';position:absolute;left:2px;top:7px;width:5px;height:5px;border:1px solid var(--acc);border-radius:50%}
+.neg{font-size:11px;color:var(--dim);padding-left:14px;position:relative}
+.neg::before{content:'';position:absolute;left:3px;top:8px;width:4px;height:4px;background:var(--line3);border-radius:50%}
+.probes{display:flex;flex-direction:column;gap:6px}
+.probe{display:flex;gap:9px;align-items:center;justify-content:space-between;border:1px solid var(--line);padding:7px 10px;background:#0d0d10;font-size:11px}
+.probe .pt{color:var(--txt);flex:1}
+.probe button{font-size:10px;padding:2px 9px;white-space:nowrap}
 
 /* markdown dossier */
 .md{font-size:12px;color:var(--txt);line-height:1.65}
@@ -198,6 +239,7 @@ code.codechip{color:var(--txt-hi);background:var(--acc-bg);padding:0 5px;border:
     <div class="navhead">
       <button id="tab-people" class="tabbtn active">PEOPLE</button>
       <button id="tab-run" class="tabbtn">RUN</button>
+      <button id="tab-ledger" class="tabbtn">LEDGER</button>
     </div>
     <div id="sessions"></div>
     <div class="navfoot">
@@ -236,18 +278,31 @@ code.codechip{color:var(--txt-hi);background:var(--acc-bg);padding:0 5px;border:
       <div class="card"><h2>TELEMETRY</h2><div id="telemetry"></div><div id="netlog"></div></div>
       <div class="card"><h2>DEEP DIVE — BROWSER COLLECTION</h2><div id="runDossier"></div></div>
     </section>
+
+    <section id="view-ledger" class="view">
+      <div class="card"><h2>LEDGER — EVERY ARTIFACT<span class="cnt">the audit trail across all subjects</span></h2>
+        <div class="ledgerbar">
+          <select id="ledger-subject"><option value="">all subjects</option></select>
+          <select id="ledger-layer"><option value="">all layers</option></select>
+          <select id="ledger-conf"><option value="">all confidence</option><option value="confirmed">confirmed</option><option value="probable">probable</option><option value="unverified">unverified</option><option value="inference">inference</option></select>
+          <input id="ledger-q" placeholder="filter artifact / source…">
+          <span id="ledger-count" class="dim" style="font-size:11px"></span>
+        </div>
+        <div id="ledgerbody"></div>
+      </div>
+    </section>
   </main>
 </div>
 
-<footer><span>symiparrot // osint-dark v3</span><span>passive collection // sources in-row</span><span id="fcount"></span></footer>
+<footer><span>symiparrot // osint-dark v4</span><span>control plane // agent is the brain</span><span id="fcount"></span></footer>
 <div class="flash" id="flash"></div>
 <div id="jserr"></div>
 
 <script>
 'use strict';
-/* ================= OSINT DARK v3 ================= */
+/* ================= OSINT DARK v4 — control plane ================= */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const LS='osint-dark-v3';
+const LS='osint-dark-v4';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const nowISO=()=>new Date().toISOString().replace('T',' ').slice(0,16)+'Z';
 
@@ -342,14 +397,16 @@ let S=null, PEOPLE={}, VIEW='people', CURRENT_PERSON=null;
 /* ---------- views ---------- */
 function show(v){
   VIEW=v;
-  ['people','profile','run'].forEach(x=>{
+  ['people','profile','run','ledger'].forEach(x=>{
     const el=document.getElementById('view-'+x);
     if(el) el.classList.toggle('on', x===v);
   });
-  const tp=$('#tab-people'), tr=$('#tab-run');
+  const tp=$('#tab-people'), tr=$('#tab-run'), tl=$('#tab-ledger');
   if(tp) tp.classList.toggle('active', v==='people'||v==='profile');
   if(tr) tr.classList.toggle('active', v==='run');
+  if(tl) tl.classList.toggle('active', v==='ledger');
   ghostPaint();
+  if(v==='ledger') ledgerPaint();
 }
 function ghostPaint(){
   const g=$('#ghost'); if(!g) return;
@@ -363,6 +420,7 @@ async function loadPeople(){
   try{const j=await api('api/dossiers');PEOPLE=j.dossiers||{}}
   catch(e){PEOPLE={};console.warn('loadPeople',e.message)}
   peoplePaint();
+  ledgerFilters();
 }
 function peoplePaint(){
   const el=$('#people'); if(!el) return;
@@ -377,9 +435,10 @@ function peoplePaint(){
       const snippet=String(d.summary||d.text||'').replace(/[#*`]/g,'').replace(/\s+/g,' ').trim().slice(0,150);
       const conf=String(d.confidence||'').toLowerCase();
       const dot=conf?'<span class="dot '+(conf==='high'?'ok':conf==='medium'?'warn':'bad')+'"></span>':'';
+      const arts=(d.ledger||[]).length;
       return '<div class="person" data-k="'+esc(k)+'" tabindex="0" role="button">'
         +'<div class="pn">'+dot+esc(d.title||k)+'</div>'
-        +'<div class="pm">'+esc(d.when||'')+(d.when?' · ':'')+'click to open dossier</div>'
+        +'<div class="pm">'+esc(d.when||'')+(d.when?' · ':'')+(arts?arts+' artifacts · ':'')+'click to open dossier</div>'
         +(snippet?'<div class="ps">'+esc(snippet)+'</div>':'')
         +'</div>';
     }).join('');
@@ -394,7 +453,7 @@ function peoplePaint(){
 /* ---------- profile rendering ---------- */
 let XID=0;
 const confDot=c=>{const k=String(c||'').toLowerCase();
-  return '<span class="dot '+(k==='high'?'ok':k==='medium'?'warn':k==='low'?'bad':'')+'"></span>'};
+  return '<span class="dot '+(k==='high'||k==='confirmed'?'ok':k==='medium'||k==='probable'?'warn':'bad')+'"></span>'};
 
 function kvPanel(pairs){
   const rows=pairs.filter(p=>p[1]!==undefined&&p[1]!==null&&p[1]!=='');
@@ -424,6 +483,23 @@ function imagesFrom(d){
   return urls.slice(0,8).map(u=>'<figure><img src="'+esc(u)+'" loading="lazy" alt="" onerror="this.parentNode.style.display=\'none\'"><figcaption>'+esc(u)+'</figcaption></figure>').join('');
 }
 
+/* layer coverage: 10 layers from the skill */
+const LAYERS=['identity','email','phone','domain','web','corporate','social','geospatial','breach','code'];
+function coverageFrom(d){
+  const declared={};
+  (d.layers||[]).forEach(l=>{declared[String(l.name||'').toLowerCase()]={status:l.status||'gap',artifacts:l.artifacts||0}});
+  // derive from ledger when not declared
+  const counts={};
+  (d.ledger||[]).forEach(r=>{const k=String(r.layer||'').toLowerCase();counts[k]=(counts[k]||0)+1});
+  return LAYERS.map(name=>{
+    const dec=declared[name];
+    const n=dec?dec.artifacts:(counts[name]||0);
+    let status=dec?dec.status:(n>0?'done':'gap');
+    if(status==='done'&&n===0) status='partial';
+    return {name,status,artifacts:n};
+  });
+}
+
 function renderProfile(key){
   const d=PEOPLE[key]||{};
   const id=d.identity||{}, ct=d.contact||{}, dig=d.digital||{};
@@ -432,6 +508,13 @@ function renderProfile(key){
 
   /* ---- header ---- */
   const roleLine=[d.role, d.org].filter(Boolean).join(' · ');
+  const qblock=(d.question||d.scope||d.product)
+    ? '<div class="qblock">'
+      +(d.question?'<div class="ql">INTELLIGENCE QUESTION</div><div class="qv">'+esc(d.question)+'</div>':'')
+      +(d.scope?'<div class="ql">SCOPE / AUTHORITY</div><div class="qv">'+esc(d.scope)+'</div>':'')
+      +(d.product?'<div class="ql">PRODUCT</div><div class="qv">'+esc(d.product)+'</div>':'')
+      +'</div>'
+    : '';
   $('#profile-head').innerHTML='<div class="card">'
     +'<div class="phead">'
     +'<div class="phead-l">'
@@ -443,6 +526,7 @@ function renderProfile(key){
     +(d.location?'<span>'+esc(d.location)+'</span>':'')
     +'<span>published '+esc(d.when||'—')+'</span>'
     +(conf?'<span class="conf" data-x="confpanel">'+confDot(conf)+'confidence '+esc(conf)+'</span>':'')
+    +'<span>'+((d.ledger||[]).length)+' artifacts</span>'
     +'<span>'+Object.keys(PEOPLE).length+' in roster</span>'
     +'</div></div></div>'
     +'<div class="phead-r">'
@@ -452,6 +536,7 @@ function renderProfile(key){
     +'<button id="b-back">&#8592; BACK</button>'
     +'</div></div>'
     +(d.summary?'<div class="psummary">'+esc(d.summary)+'</div>':'')
+    +qblock
     +'<div class="dpanel" id="confpanel" style="display:none">'
     +kvPanel([['confidence',conf||'unknown'],['basis',d.confidence_basis||'see evidence rows'],
               ['published',d.when||'—'],['key',key]])
@@ -460,6 +545,14 @@ function renderProfile(key){
 
   /* ---- body sections ---- */
   const parts=[];
+
+  /* coverage matrix */
+  const cov=coverageFrom(d);
+  const covDone=cov.filter(c=>c.status==='done').length;
+  const covBody='<div class="cov">'+cov.map(c=>
+    '<div class="covitem '+c.status+'"><span class="cn">'+esc(c.name.toUpperCase())+'</span>'
+    +'<span class="cv">'+(c.status==='gap'?'gap':c.artifacts+' art')+'</span></div>').join('')+'</div>';
+  parts.push(sec('LAYER COVERAGE',covDone+'/'+LAYERS.length+' layers',covBody));
 
   /* identity + confidence */
   const idRows=[];
@@ -535,9 +628,40 @@ function renderProfile(key){
       +(e.url?'<a href="'+esc(e.url)+'" target="_blank" rel="noopener">open source &#8599;</a>':'')}));
   parts.push(sec('EVIDENCE',evRows.length?evRows.length+' rows':'',evRows.join('')));
 
+  /* pivot chains */
+  const piv=(d.pivots||[]).map(p=>'<div class="pivot">'
+    +'<div class="ph"><span class="pfrom">'+esc((p.from||'').toUpperCase())+'</span>'
+    +'<span class="parrow">&#8594;</span><span class="pvia">'+esc(p.via||'')+'</span></div>'
+    +'<div class="pto">'+esc(p.to_value||p.to||'')+'</div>'
+    +(p.confidence?'<div class="pconf">'+confDot(p.confidence)+esc(p.confidence)+'</div>':'')
+    +'</div>').join('');
+  parts.push(sec('PIVOT CHAINS',(d.pivots||[]).length?(d.pivots||[]).length+' hops':'',piv));
+
+  /* ledger (per subject) */
+  const led=(d.ledger||[]);
+  const ledBody=led.length
+    ? '<table><thead><tr><th>LAYER</th><th>ARTIFACT</th><th>SOURCE</th><th>WHEN</th><th>CONF</th></tr></thead><tbody>'
+      +led.map(r=>'<tr><td class="lay">'+esc(r.layer||'')+'</td>'
+        +'<td class="art">'+esc(r.artifact||'')+'</td>'
+        +'<td class="src">'+(r.source?'<a href="'+esc(r.source)+'" target="_blank" rel="noopener">'+esc(r.source)+'</a>':esc(r.source||''))+'</td>'
+        +'<td class="lay">'+esc(r.at||'')+'</td>'
+        +'<td class="conf">'+confDot(r.confidence)+esc(r.confidence||'')+'</td></tr>').join('')
+      +'</tbody></table>'
+    : '';
+  parts.push(sec('LEDGER — ARTIFACTS',led.length?led.length+' rows':'',ledBody));
+
+  /* negative findings */
+  const neg=(d.negative_findings||[]).map(n=>'<div class="neg">'+esc(n)+'</div>').join('');
+  parts.push(sec('NEGATIVE FINDINGS',(d.negative_findings||[]).length?(d.negative_findings||[]).length+'':'',neg?'<div class="gaps">'+neg+'</div>':''));
+
   /* gaps */
   const gaps=(d.gaps||[]).map(g=>'<div class="gap">'+esc(g)+'</div>').join('');
   parts.push(sec('OPEN GAPS',(d.gaps||[]).length?(d.gaps||[]).length+'':'',gaps?'<div class="gaps">'+gaps+'</div>':''));
+
+  /* next probes — control plane: operator can queue one */
+  const probes=(d.next_probes||[]).map((p,i)=>'<div class="probe"><span class="pt">'+esc(p)+'</span>'
+    +'<button data-probe="'+esc(p)+'">QUEUE</button></div>').join('');
+  parts.push(sec('NEXT PROBES — DIRECT THE AGENT',(d.next_probes||[]).length?(d.next_probes||[]).length+' available':'',probes?'<div class="probes">'+probes+'</div>':''));
 
   /* agent dossier */
   parts.push(sec('AGENT DOSSIER — ANALYSIS','published by the agent',
@@ -581,6 +705,14 @@ function wireProfile(){
       }else flash('clipboard unavailable');
     };
   });
+  $$('#profile-body [data-probe]').forEach(b=>{
+    b.onclick=async e=>{e.stopPropagation();
+      const probe=b.dataset.probe;
+      await postJSON('api/run',{subject:CURRENT_PERSON,mode:'probe',probe,at:nowISO()});
+      b.textContent='QUEUED'; b.disabled=true;
+      flash('probe queued — tell the agent in chat');
+    };
+  });
   const rt=$('#rawtoggle');
   if(rt) rt.onclick=()=>{
     const p=$('#rawjson'); if(!p) return;
@@ -603,6 +735,53 @@ function openPerson(key){
 async function rerun(key,mode){
   await postJSON('api/run',{subject:key,mode,at:nowISO()});
   flash('re-run requested: '+mode+' — tell the agent in chat');
+}
+
+/* ---------- global ledger ---------- */
+function ledgerFilters(){
+  const sub=$('#ledger-subject'), lay=$('#ledger-layer');
+  if(sub){
+    const cur=sub.value;
+    sub.innerHTML='<option value="">all subjects</option>'
+      +Object.keys(PEOPLE).sort().map(k=>'<option value="'+esc(k)+'">'+esc(k)+'</option>').join('');
+    sub.value=cur;
+  }
+  if(lay){
+    const cur=lay.value;
+    const seen=new Set();
+    Object.values(PEOPLE).forEach(d=>(d.ledger||[]).forEach(r=>{if(r.layer)seen.add(String(r.layer).toLowerCase())}));
+    lay.innerHTML='<option value="">all layers</option>'
+      +[...seen].sort().map(l=>'<option value="'+esc(l)+'">'+esc(l)+'</option>').join('');
+    lay.value=cur;
+  }
+}
+function ledgerPaint(){
+  const el=$('#ledgerbody'); if(!el) return;
+  const rows=[];
+  for(const [k,d] of Object.entries(PEOPLE)){
+    for(const r of (d.ledger||[])) rows.push({subject:k,layer:String(r.layer||'').toLowerCase(),
+      artifact:r.artifact||'',source:r.source||'',at:r.at||'',confidence:r.confidence||''});
+  }
+  const fs=$('#ledger-subject')?.value||'';
+  const fl=$('#ledger-layer')?.value||'';
+  const fc=$('#ledger-conf')?.value||'';
+  const fq=($('#ledger-q')?.value||'').toLowerCase();
+  let f=rows;
+  if(fs) f=f.filter(r=>r.subject===fs);
+  if(fl) f=f.filter(r=>r.layer===fl);
+  if(fc) f=f.filter(r=>String(r.confidence).toLowerCase()===fc);
+  if(fq) f=f.filter(r=>(r.artifact+' '+r.source).toLowerCase().includes(fq));
+  const cnt=$('#ledger-count'); if(cnt) cnt.textContent=f.length+' / '+rows.length+' artifacts';
+  if(!rows.length){el.innerHTML='<div class="hintline">no ledger rows published yet — the agent writes these as it collects</div>';return}
+  if(!f.length){el.innerHTML='<div class="hintline">no rows match this filter</div>';return}
+  el.innerHTML='<table><thead><tr><th>SUBJECT</th><th>LAYER</th><th>ARTIFACT</th><th>SOURCE</th><th>WHEN</th><th>CONF</th></tr></thead><tbody>'
+    +f.map(r=>'<tr><td class="lay">'+esc(r.subject)+'</td>'
+      +'<td class="lay">'+esc(r.layer)+'</td>'
+      +'<td class="art">'+esc(r.artifact)+'</td>'
+      +'<td class="src">'+(r.source?'<a href="'+esc(r.source)+'" target="_blank" rel="noopener">'+esc(r.source)+'</a>':'')+'</td>'
+      +'<td class="lay">'+esc(r.at)+'</td>'
+      +'<td class="conf">'+confDot(r.confidence)+esc(r.confidence)+'</td></tr>').join('')
+    +'</tbody></table>';
 }
 
 /* ---------- network engine (server-proxied, no CORS) ---------- */
@@ -904,7 +1083,12 @@ $('#b-export').onclick=exportJSON;
 $('#b-refresh').onclick=()=>{loadPeople();flash('roster refreshed')};
 $('#tab-people').onclick=()=>{show('people');loadPeople()};
 $('#tab-run').onclick=()=>show('run');
+$('#tab-ledger').onclick=()=>show('ledger');
 $('#subject').addEventListener('keydown',e=>{if(e.key==='Enter')doFind()});
+['ledger-subject','ledger-layer','ledger-conf'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.onchange=ledgerPaint;
+});
+const lq=$('#ledger-q'); if(lq) lq.oninput=ledgerPaint;
 
 /* ---------- boot ---------- */
 async function boot(){

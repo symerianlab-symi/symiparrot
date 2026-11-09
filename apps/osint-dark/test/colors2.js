@@ -1,0 +1,18 @@
+const RED='rgb(229, 72, 77)';
+const R={redText:[],checked:0};
+const audit=(sel,label)=>{const e=document.querySelector(sel);if(!e)return;
+  R.checked++;const c=getComputedStyle(e).color;if(c===RED)R.redText.push(label+' ('+sel+')')};
+await loadPeople();
+document.querySelector('#people .person').click(); await new Promise(r=>setTimeout(r,400));
+audit('.pname','name');audit('.prole','role');audit('.psummary','summary');
+audit('.qblock .qv','question');audit('.qblock .ql','question label');
+audit('.covitem .cn','coverage name');audit('.covitem .cv','coverage value');
+audit('.pivot .pfrom','pivot from');audit('.pivot .pvia','pivot via');audit('.pivot .pto','pivot to');
+audit('.probe .pt','probe text');audit('.neg','negative');audit('.gap','gap');
+audit('#profile-body .card h2','section heading');
+audit('#profile-body table td','ledger cell');audit('#profile-body table th','ledger head');
+audit('#agentdossier .md-h1','md h1');audit('#agentdossier p','md p');
+document.getElementById('tab-ledger').click(); await new Promise(r=>setTimeout(r,300));
+audit('#ledgerbody td.art','global ledger artifact');audit('#ledgerbody td.lay','global ledger layer');
+R.checkedCount=R.checked;
+return JSON.stringify(R,null,1);

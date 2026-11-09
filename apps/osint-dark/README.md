@@ -1,9 +1,19 @@
 # OSINT DARK
 
-The readable output surface for OSINT runs on this machine. A dark, single-page
-app that shows the agent's findings as a per-person dossier, plus a
-candidates-first workflow where the operator picks a coded candidate (`P01`…)
-and hands that code back to the agent in chat.
+The **control plane** for OSINT runs on this machine. The agent is the brain and
+does the collection; this app is where the operator reads the result and directs
+the next move.
+
+Three surfaces:
+
+- **PEOPLE** — roster of every subject with a published dossier
+- **PROFILE** — the deep dossier: coverage matrix, identity, contact, employment,
+  digital footprint, associates, timeline, evidence, pivot chains, the full
+  ledger, negative findings, gaps, and next probes the operator can queue
+- **LEDGER** — every artifact across every subject, filterable by subject, layer,
+  confidence, and free text
+- **RUN** — candidates-first workflow: the agent proposes coded candidates
+  (`P01`…), the operator picks one and hands the code back in chat
 
 Access: `https://ghost.taild6f361.ts.net/osint/` (or `onsint` from any shell).
 
@@ -17,8 +27,9 @@ browser (index.html)  ──►  server.py (127.0.0.1:18790)  ──►  state.j
         └── localStorage: sessions, candidates, hints
 ```
 
-`state.json` is the agent ↔ app bridge. The agent publishes dossiers into it;
-the app reads them and writes picks/hints back.
+`state.json` is the agent ↔ app bridge. The agent publishes dossiers into it; the
+app reads them and writes picks, hints, and queued probes back. The agent reads
+`GET /api/runs` to see what the operator asked for.
 
 ## API
 
@@ -60,6 +71,12 @@ it just shows fewer sections.
   "confidence": "high",                   // high | medium | low
   "confidence_basis": "why this rating",
   "summary": "one-line verdict shown under the header",
+
+  // Phase 0 — the app shows these in a block under the header
+  "question": "the intelligence question, one sentence",
+  "scope": "public/passive only | client-owned | credentialed",
+  "product": "dossier | attack-surface map | timeline",
+
   "role": "Founder & CEO",
   "org": "ACME",
   "location": "Dallas, TX",
@@ -91,20 +108,52 @@ it just shows fewer sections.
   "evidence": [{"claim":"…","source":"…","url":"…","confidence":"high","type":"primary"}],
   "gaps":     ["no date of birth", "no direct email"],
 
+  // Phase 3 — the ledger. One row per artifact. This is the audit trail.
+  "ledger": [
+    {"layer":"email","artifact":"jane@acme.com","source":"https://acme.com","at":"2026-11-09","confidence":"confirmed"}
+  ],
+
+  // Phase 4 — pivot chains. Which artifact led where.
+  "pivots": [
+    {"from":"email","via":"gravatar","to":"profile","to_value":"janedoe","confidence":"confirmed"}
+  ],
+
+  // Phase 1 — layer coverage. status: done | partial | gap
+  "layers": [
+    {"name":"identity","status":"done","artifacts":6},
+    {"name":"breach","status":"gap","artifacts":0}
+  ],
+
+  // Negative results are findings — report them.
+  "negative_findings": ["no breach record", "no GitHub presence"],
+
+  // Phase 5 — what one more hour or key would buy. Operator can queue these.
+  "next_probes": ["Texas SOS entity lookup", "carrier lookup on +1 555…"],
+
   "text": "# OSINT DOSSIER\n\n## VERDICT\n…markdown narrative…",
   "raw":  "source trail / evidence blob"
 }
 ```
 
+Layer names the app expects: `identity`, `email`, `phone`, `domain`, `web`,
+`corporate`, `social`, `geospatial`, `breach`, `code`. Confidence values:
+`confirmed`, `probable`, `unverified`, `inference`.
+
 Rendering rules:
 
 | Field | Where it appears |
 |---|---|
+| `question`, `scope`, `product` | block under the profile header |
 | `summary` | under the profile header |
+| `layers` | LAYER COVERAGE matrix (10 chips, derived from `ledger` if absent) |
 | `identity`, `contact`, `employment`, `digital`, `associates` | their own cards, one row per entry |
 | `timeline` | vertical timeline with red event dots |
 | `evidence` | EVIDENCE card, one row per claim |
+| `pivots` | PIVOT CHAINS card, one block per hop |
+| `ledger` | LEDGER card (per subject) and the global LEDGER tab |
+| `negative_findings` | NEGATIVE FINDINGS card |
 | `gaps` | OPEN GAPS card and the CONFIDENCE card |
+| `next_probes` | NEXT PROBES card, each with a QUEUE button |
 | `text` | AGENT DOSSIER card, rendered as markdown |
 | `raw` | RAW LAYER card, verbatim |
 
@@ -114,6 +163,10 @@ evidence row. Emails and phones get a COPY button; associates with a `link`
 that matches another published subject get an OPEN DOSSIER button; evidence
 rows with a `url` get an "open source" link. The confidence chip in the header
 expands to show `confidence_basis`. RAW JSON is behind a toggle.
+
+**Control plane.** Every `next_probes` entry has a QUEUE button. Pressing it
+POSTs `{subject, mode:"probe", probe}` to `/api/run`, which the agent reads from
+`GET /api/runs`. That is how the operator directs the investigation.
 
 Any image URLs found in `text` or `raw` are rendered in an IMAGES card.
 

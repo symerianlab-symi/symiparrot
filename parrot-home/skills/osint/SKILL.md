@@ -289,18 +289,68 @@ The dossier, always in this shape:
 5. **Gaps and next probes** — what one more hour or one more key would buy
 6. **Confidence legend** — no unsourced sentence, ever
 
-Publish to the OSINT DARK app so the operator can read it:
+Publish to the OSINT DARK app so the operator can read it and direct the next move:
 
 ```bash
 curl -s -X POST http://127.0.0.1:18790/api/dossiers \
   -H 'Content-Type: application/json' \
-  -d '{"subject":"<key>","dossier":{ ...structured schema... }}'
+  -d '{"subject":"<key>","dossier":{ ...schema below... }}'
 ```
 
-The app renders `identity`, `contact`, `employment`, `digital`, `associates`,
-`timeline`, `evidence`, `gaps`, plus `text` (markdown) and `raw`. See
-`apps/osint-dark/README.md` for the full schema. Fill the structured fields — a
-markdown blob alone wastes the layout.
+The app is the **control plane**; you are the brain. It renders what you publish
+and lets the operator queue the next probe. Fill every field you can — a markdown
+blob alone wastes the layout.
+
+```jsonc
+{
+  "title": "Name — Role, Org", "when": "2026-11-09",
+  "confidence": "high", "confidence_basis": "why",
+  "summary": "one-line verdict",
+
+  // Phase 0 — always state these
+  "question": "the intelligence question, one sentence",
+  "scope": "public/passive only | client-owned | credentialed",
+  "product": "dossier | attack-surface map | timeline",
+
+  "role": "...", "org": "...", "location": "...",
+  "identity": {...}, "contact": {...}, "employment": [...],
+  "digital": {...}, "associates": [...], "timeline": [...],
+  "evidence": [...], "gaps": [...],
+
+  // Phase 3 — the ledger. One row per artifact. This is the audit trail.
+  "ledger": [
+    {"layer":"email","artifact":"x@y.com","source":"https://…","at":"2026-11-09","confidence":"confirmed"}
+  ],
+
+  // Phase 4 — the pivot chains. Which artifact led where.
+  "pivots": [
+    {"from":"email","via":"gravatar","to":"profile","to_value":"strategyoracle","confidence":"confirmed"}
+  ],
+
+  // Phase 1 — layer coverage. status: done | partial | gap
+  "layers": [
+    {"name":"identity","status":"done","artifacts":6},
+    {"name":"breach","status":"gap","artifacts":0}
+  ],
+
+  // Negative results are findings — report them.
+  "negative_findings": ["no breach record", "no GitHub presence"],
+
+  // Phase 5 — what one more hour or key would buy. The operator can queue these.
+  "next_probes": ["Texas SOS entity lookup", "carrier lookup on +1 217…"],
+
+  "text": "# OSINT DOSSIER\n…markdown narrative…",
+  "raw": "source trail"
+}
+```
+
+Layer names the app expects: `identity`, `email`, `phone`, `domain`, `web`,
+`corporate`, `social`, `geospatial`, `breach`, `code`. Confidence values:
+`confirmed`, `probable`, `unverified`, `inference`.
+
+The operator sees a coverage matrix, the pivot chains, the full ledger (filterable
+by subject/layer/confidence), negative findings, and a QUEUE button on every next
+probe. Queued probes land in `GET /api/runs` — read them and act.
 
 ## 7. Local ops notes (this box)
 
