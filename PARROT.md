@@ -40,6 +40,12 @@ Branch `symi-parrot`. Fork of stock `@symerian/symi` 2026.12.87
   Readable output surface: structured dossier schema, per-person profile pages,
   candidates-first `P##` workflow, hints, telemetry. Served at
   `https://ghost.taild6f361.ts.net/osint/` via `onsint`.
+- **Collection orchestrator** — `apps/osint-dark/collect.py`. Runs the
+  layer-appropriate collectors for a target (domain / email / username / name /
+  ip / phone) and emits a ledger in the app's schema. Stdlib only, every collector
+  isolated, every request timed out, duplicates dropped, collector errors reported
+  as negative findings. `--deep` adds the slow local tools; `--publish` writes a
+  dossier straight into the app. A domain run yields 100–150 artifacts in ~35s.
 - **GitHub token** — `gh auth token` gives 5000 req/h plus commit and code search;
   the skill treats this as the highest-yield source on the box.
 

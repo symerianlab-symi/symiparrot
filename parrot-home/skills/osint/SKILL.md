@@ -62,28 +62,82 @@ entry point and a pivot out.
 Everything below was **verified working on this box**. Re-verify with `command -v`
 before relying on it; do not assume.
 
+### 3.0 The orchestrator — start here
+
+`~/SYMI-WS/osint-dark/collect.py` runs the layer-appropriate collectors for a
+target and emits a ledger. Use it to seed every run, then pivot manually on what
+it surfaces.
+
+```bash
+export PATH="$HOME/.venvs/osint/bin:$PATH"
+cd ~/SYMI-WS/osint-dark
+
+./collect.py domain   example.com              # CT, DNS, RDAP, archive, urlscan, GitHub org
+./collect.py email    someone@example.com      # gravatar, MX, GitHub commit search
+./collect.py username torvalds                 # GitHub profile (+ sherlock/maigret with --deep)
+./collect.py name     "Linus Torvalds"         # GitHub users, Wikidata, Wikipedia
+./collect.py ip       8.8.8.8                  # ports, hostnames, geo, ASN, netblock
+./collect.py phone    "+1 217 415 7211"        # E.164, region, carrier, line type
+
+# flags
+--deep                 # add slow local tools (sherlock, maigret, holehe, socialscan)
+--json                 # emit the ledger as JSON
+--publish "Subject"    # publish a dossier straight into the OSINT DARK app
+```
+
+It dedups, isolates every collector (one failure never kills the run), times out
+every request, and reports collector errors as negative findings. A domain run
+typically yields 100–150 artifacts in ~35s.
+
 ### 3.1 Local tools (installed)
 
 ```bash
-export PATH="$HOME/.venvs/osint/bin:$PATH"   # holehe, maigret, socid_extractor, ipwhois
+export PATH="$HOME/.venvs/osint/bin:$PATH"   # holehe, maigret, socid_extractor, ipwhois, socialscan, h8mail, snscrape, waymore
 
+# identity / username
 sherlock --timeout 8 <username>              # 400+ sites, fast, noisy
 maigret --top 50 --timeout 8 <username>      # richer: extracts profile IDs/tags
+socialscan <email|username>                  # which platforms have it registered
 holehe --only-used <email>                   # which sites have this email registered
+h8mail -t <email>                            # breach lookup (needs breach sources/keys)
+
+# domain / infrastructure
 theHarvester -d <domain> -b crtsh,duckduckgo -l 500
 amass enum -passive -d <domain>              # passive subdomain enum
+dnsenum <domain>                             # DNS + zone-transfer attempt
+dnsrecon -d <domain>                         # DNS enumeration
+fierce --domain <domain>                     # DNS recon
+dmitry -winse <domain>                       # whois, net, subdomains, email
 httpx -u <url> -title -tech-detect -status-code -silent
+whatweb <url>                                # tech fingerprint
+wafw00f <url>                                # WAF detection
 nmap -sV -Pn <host>                          # service/version banners
-exiftool <file>                              # GPS, author, software, timestamps
-trufflehog filesystem <path>                 # secrets in a local tree
-trufflehog github --org=<org>                # secrets in an org's repos
+ffuf -u https://<host>/FUZZ -w <wordlist>    # content discovery
+gobuster dir -u https://<host> -w <wordlist> # content discovery
+s3scanner scan --bucket <name>               # S3 bucket exposure
+cloud_enum -k <keyword>                      # cloud storage enumeration
+
+# web / documents / media
 photon -u <url>                              # crawler: URLs, emails, keys, socials
 emailharvester -d <domain>                   # emails from search engines
-dnsenum <domain>                             # DNS + zone-transfer attempt
-dmitry -winse <domain>                       # whois, net, subdomains, email
+waymore -i <domain> -mode U                  # URLs from archives (wayback/commoncrawl)
+metagoofil -d <domain> -t pdf,doc,xls -l 50  # documents + metadata
+exiftool <file>                              # GPS, author, software, timestamps
+yt-dlp --dump-json <url>                     # video metadata, uploader, timestamps
+instaloader <profile>                        # Instagram posts + metadata
+
+# secrets / code
+trufflehog filesystem <path>                 # secrets in a local tree
+trufflehog github --org=<org>                # secrets in an org's repos
+
+# automation / graph
 spiderfoot -s <target> -t <type> -u passive -o json   # automation engine
 recon-ng                                     # interactive; workspaces per target
 maltego                                      # GUI graph transforms
+
+# dark web
+tor                                          # SOCKS5 on 127.0.0.1:9050 (service active)
+proxychains4 curl -s "http://<onion>"        # route through Tor
 ```
 
 `spiderfoot` is the best single-shot automation: `-u passive` keeps it non-intrusive,
@@ -136,6 +190,46 @@ curl -s "https://otx.alienvault.com/api/v1/indicators/domain/$D/general"
 ```bash
 curl -s "https://efts.sec.gov/LATEST/search-index?q=%22$NAME%22"          # US full-text filings
 curl -s "https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=$NAME"
+```
+
+**Blockchain.**
+
+```bash
+curl -s "https://blockchain.info/rawaddr/$BTC_ADDR"                       # balance, txs, counterparties
+curl -s "https://api.etherscan.io/api?module=account&action=balance&address=$ETH_ADDR"
+```
+
+**Geospatial.**
+
+```bash
+curl -s -A "osint/4" "https://nominatim.openstreetmap.org/search?q=$PLACE&format=json"
+curl -s -A "osint/4" "https://nominatim.openstreetmap.org/reverse?lat=$LAT&lon=$LON&format=json"
+curl -s "https://api.sunrise-sunset.org/json?lat=$LAT&lng=$LON&date=$DATE"  # shadow/time-of-day
+# Overpass (OSM features near a point) — POST the query, do not GET it
+curl -s -A "osint/4" --data-urlencode 'data=[out:json];node["amenity"="cafe"](32.77,-96.80,32.79,-96.78);out 1;' \
+  "https://overpass-api.de/api/interpreter"
+```
+
+**Reference / encyclopaedic.**
+
+```bash
+curl -s "https://www.wikidata.org/w/api.php?action=wbsearchentities&search=$NAME&language=en&format=json"
+curl -s "https://en.wikipedia.org/api/rest_v1/page/summary/$TITLE"
+```
+
+**Developer identity** — package registries expose maintainer emails and history.
+
+```bash
+curl -s "https://registry.npmjs.org/-/v1/search?text=$NAME&size=20"
+curl -s "https://pypi.org/pypi/$PKG/json"
+curl -s "https://crates.io/api/v1/crates/$CRATE"
+```
+
+**Dark web** — Tor is installed and running (SOCKS5 on 127.0.0.1:9050).
+
+```bash
+curl -sL "https://ahmia.fi/search/?q=$TERM"                # clearnet onion index
+proxychains4 curl -s "http://<onion-address>"              # route through Tor
 ```
 
 **Identity.**
@@ -370,10 +464,34 @@ probe. Queued probes land in `GET /api/runs` — read them and act.
 
 ## 8. Honest gaps
 
-Not installed, do not claim them: `subfinder`, `nuclei`, `gitleaks`, `h8mail`,
-`socialscan`, `ghunt`, `toutatis`, `blackbird`, `ignorant`, `crepu`.
-Substitutes that ARE installed: `amass` (subfinder), `trufflehog` (gitleaks),
-`holehe` (h8mail/socialscan), `sherlock`+`maigret` (blackbird).
+**Installed and usable:** `socialscan`, `h8mail`, `snscrape`, `waymore`, `metagoofil`,
+`tor`, `proxychains4`, `yt-dlp`, `instaloader`, `s3scanner`, `cloud_enum`, `ffuf`,
+`gobuster`, `whatweb`, `wafw00f`, `dnsrecon`, `fierce`.
 
-No breach API, no Shodan search, no Censys, no paid people-search. If a task truly
-needs one, say so and name the key — do not silently produce a thinner dossier.
+**Still not installed, do not claim them:** `subfinder`, `nuclei`, `gitleaks`,
+`ghunt`, `toutatis`, `blackbird`, `ignorant`, `crepu`, `mosint`.
+Substitutes that ARE installed: `amass` (subfinder), `trufflehog` (gitleaks),
+`sherlock`+`maigret`+`socialscan` (blackbird/ignorant/crepu).
+
+**No API keys configured.** This is the single biggest depth limiter. Without them
+there is no breach data, no Shodan search, no Censys, no corporate-registry API, no
+sanctions screening, no phone carrier lookup, no email verification, no face search.
+`h8mail` is installed but has no breach source to query.
+
+If a task genuinely needs one of these, say so and name the key — do not silently
+produce a thinner dossier and present it as complete.
+
+| Key | Unlocks |
+|---|---|
+| `HIBP_API_KEY` | breach membership by email |
+| `SHODAN_API_KEY` | internet-wide banner search |
+| `CENSYS_API_ID`/`SECRET` | host + certificate search |
+| `OPENCORPORATES_API_KEY` | global company registry |
+| `OPENSANCTIONS_API_KEY` | sanctions / PEP screening |
+| `HUNTER_API_KEY` | email pattern verification |
+| `VT_API_KEY` | VirusTotal reputation |
+| `EXA_API_KEY` / `PERPLEXITY_API_KEY` / `JAI_API_KEY` | web search |
+
+**Social platforms with no tooling:** Twitter/X, TikTok, Telegram, Reddit, LinkedIn
+content. `instaloader` covers Instagram; `snscrape` covers some platforms but breaks
+as sites change. Treat social coverage as partial and say so.

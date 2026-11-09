@@ -31,6 +31,34 @@ browser (index.html)  ──►  server.py (127.0.0.1:18790)  ──►  state.j
 app reads them and writes picks, hints, and queued probes back. The agent reads
 `GET /api/runs` to see what the operator asked for.
 
+## Collection orchestrator
+
+`collect.py` is the deep pipeline behind the app. It runs the layer-appropriate
+collectors for a target and emits a ledger — the same shape the app renders.
+
+```bash
+export PATH="$HOME/.venvs/osint/bin:$PATH"
+cd ~/SYMI-WS/osint-dark
+
+./collect.py domain   example.com          # CT, DNS, RDAP, archive, urlscan, GitHub org
+./collect.py email    someone@example.com  # gravatar, MX, GitHub commit search
+./collect.py username torvalds             # GitHub profile (+ sherlock/maigret with --deep)
+./collect.py name     "Linus Torvalds"     # GitHub users, Wikidata, Wikipedia
+./collect.py ip       8.8.8.8              # ports, hostnames, geo, ASN, netblock
+./collect.py phone    "+1 217 415 7211"    # E.164, region, carrier, line type
+```
+
+| Flag | Effect |
+|---|---|
+| `--deep` | add slow local tools (sherlock, maigret, holehe, socialscan) |
+| `--json` | emit the ledger as JSON |
+| `--publish "Subject"` | publish a dossier straight into the app |
+
+Design rules: stdlib only, every collector isolated so one failure never kills the
+run, every request timed out, duplicates dropped, and collector errors reported as
+negative findings rather than hidden. A domain run typically yields 100–150
+artifacts in ~35s.
+
 ## API
 
 | Method | Path | Purpose |
