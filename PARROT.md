@@ -58,3 +58,12 @@ then restart the host (restore runs at constructor, validated).
 - `/home/ghost/tools/spiderfoot` (git clone) + `/usr/local/bin/spiderfoot` wrapper; 200+ modules (`spiderfoot -M`)
 - lxml note: py3.13 needs >=5 wheels; spiderfoot req pinned <5 (source-build ABI break) - relaxed in-place
 - Live-fire validated: sherlock 400+ sites, holehe provider hits, maigret alt-IDs, amass passive 156 subds (vs crtsh 70), GDELT news API keyless
+
+## OSINT DARK (app)
+- `apps/osint-dark/index.html` — dark-mode agent-profile sheet; live source: `~/SYMI-WS/osint-dark/`
+  (`python3 -m http.server 18790` in that dir; http://127.0.0.1:18790)
+- Dark grey bg / light grey text; OSINT DARK + date header; subject avatar+identity card,
+  findings table w/ source column, telemetry panel (requests/hits/wall-time)
+- SAVE / DELETE (localStorage `osint-dark-saves-v1`) / RE-RUN: wrong-person | deeper | darkweb
+- Engine: browser-side passive keyless chain — GitHub users→repos→commit-emails, crt.sh CT,
+  gravatar hash+avatar, archive.org CDX; seeded cache renders on first load

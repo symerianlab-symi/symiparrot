@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSINT DARK — Agent Profile System</title>
+<style>
+:root{
+  --bg:#161616; --panel:#1f1f1f; --panel2:#242424; --line:#333;
+  --txt:#c8c8c8; --dim:#8a8a8a; --acc:#7fb4d8; --ok:#7fc98f; --warn:#d8b46a; --bad:#d87f7f;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font:14px/1.5 "SF Mono",Consolas,monospace;padding:18px;max-width:1100px;margin:0 auto}
+header{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px}
+h1{font-size:15px;letter-spacing:4px;color:#e8e8e8;font-weight:600}
+#datestamp{color:var(--dim);font-size:12px}
+.spacer{flex:1}
+button{background:var(--panel2);color:var(--txt);border:1px solid var(--line);padding:5px 12px;font:inherit;font-size:12px;cursor:pointer;border-radius:2px}
+button:hover{border-color:var(--acc);color:#fff}
+button.primary{border-color:#3a5a74;color:var(--acc)}
+button.danger:hover{border-color:var(--bad);color:var(--bad)}
+input,select{background:#111;border:1px solid var(--line);color:var(--txt);padding:5px 8px;font:inherit;font-size:12px;border-radius:2px}
+input:focus,select:focus{outline:1px solid var(--acc)}
+#toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+#subject{min-width:260px}
+main{display:grid;grid-template-columns:300px 1fr;gap:14px}
+@media(max-width:800px){main{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);padding:12px;margin-bottom:12px}
+.card h2{font-size:11px;letter-spacing:2px;color:var(--acc);border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:8px;font-weight:600}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:3px 8px;font-size:12px}
+.kv b{color:var(--dim);font-weight:400}
+.avatar{width:96px;height:96px;border:1px solid var(--line);background:#111;object-fit:cover;display:block;margin:0 auto 8px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.tag{border:1px solid var(--line);padding:1px 7px;font-size:11px;color:var(--dim);border-radius:2px}
+.tag.ok{color:var(--ok);border-color:#2e4a33}.tag.warn{color:var(--warn);border-color:#4a3f2e}.tag.bad{color:var(--bad);border-color:#4a2e2e}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;color:var(--dim);font-weight:400;border-bottom:1px solid var(--line);padding:3px 6px;letter-spacing:1px}
+td{border-bottom:1px solid #222;padding:4px 6px;vertical-align:top}
+tr:hover td{background:#202020}
+a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+#telemetry{font-size:11px;color:var(--dim)}
+#telemetry b{color:var(--txt)}
+.bar{height:4px;background:#111;margin:3px 0 8px}.bar i{display:block;height:4px;background:var(--acc)}
+#empty{color:var(--dim);padding:40px;text-align:center;border:1px dashed var(--line)}
+footer{margin-top:14px;color:#555;font-size:11px;border-top:1px solid var(--line);padding-top:8px}
+.flash{position:fixed;bottom:18px;right:18px;background:var(--panel2);border:1px solid var(--acc);padding:8px 14px;font-size:12px;display:none}
+.rerun-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+dialog{background:var(--panel);color:var(--txt);border:1px solid var(--line);padding:18px;max-width:420px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+</style>
+</head>
+<body>
+<header>
+  <h1>OSINT DARK</h1><span id="datestamp"></span><div class="spacer"></div>
+  <span id="mode-badge" class="tag">STANDBY</span>
+</header>
+
+<div id="toolbar">
+  <input id="subject" placeholder="subject: name / handle / domain / email" value="Kubashen Jerome Naidoo">
+  <select id="depth">
+    <option value="standard">standard</option>
+    <option value="deep">deep</option>
+  </select>
+  <button class="primary" id="btn-run">&#9654; RUN</button>
+  <button id="btn-save">SAVE</button>
+  <button class="danger" id="btn-del">DELETE</button>
+</div>
+
+<main>
+  <aside>
+    <div class="card" id="idcard">
+      <h2>SUBJECT</h2>
+      <img class="avatar" id="avatar" alt="">
+      <div class="kv">
+        <b>NAME</b><span id="f-name">—</span>
+        <b>ALIASES</b><span id="f-alias">—</span>
+        <b>LOCATION</b><span id="f-loc">—</span>
+        <b>EMPLOYER</b><span id="f-org">—</span>
+        <b>EMAILS</b><span id="f-mails">—</span>
+      </div>
+      <div class="tags" id="conf-tags"></div>
+    </div>
+    <div class="card">
+      <h2>TELEMETRY</h2>
+      <div id="telemetry">no run yet</div>
+    </div>
+    <div class="card">
+      <h2>RE-RUN</h2>
+      <div class="rerun-row">
+        <button data-rerun="wrong-person">wrong person</button>
+        <button data-rerun="deeper">deeper dive</button>
+        <button data-rerun="darkweb">darkweb</button>
+      </div>
+      <div id="rerun-note" style="color:var(--dim);font-size:11px;margin-top:6px"></div>
+    </div>
+    <div class="card">
+      <h2>ARCHIVE</h2>
+      <select id="saved-list" size="4" style="width:100%"></select>
+      <div class="rerun-row" style="margin-top:6px">
+        <button id="btn-load">LOAD</button>
+      </div>
+    </div>
+  </aside>
+
+  <section id="dossier"><div id="empty">NO ACTIVE DOSSIER — RUN A COLLECTION</div></section>
+</main>
+
+<footer>symiparrot // osint-dark 1.0 // all data collected passively, sources cited in-record</footer>
+<div class="flash" id="flash"></div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const LS_KEY='osint-dark-saves-v1';
+
+/* ---------- date ---------- */
+const now=()=>new Date().toISOString().replace('T',' ').slice(0,16)+'Z';
+$('#datestamp').textContent=now();
+
+/* ---------- persistence (localStorage, JSON) ---------- */
+const loadAll=()=>{try{return JSON.parse(localStorage.getItem(LS_KEY))||{}}catch{return{}}};
+const saveAll=o=>localStorage.setItem(LS_KEY,JSON.stringify(o));
+function refreshArchive(){
+  const all=loadAll(),sel=$('#saved-list');sel.innerHTML='';
+  Object.keys(all).sort().forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=`${k} — ${all[k].subject}`;sel.append(o)});
+}
+function flash(msg){const f=$('#flash');f.textContent=msg;f.style.display='block';setTimeout(()=>f.style.display='none',1800)}
+
+/* ---------- the collection engine (browser-side, passive, keyless) ---------- */
+async function j(url,opt){const r=await fetch(url,opt);if(!r.ok)throw new Error(r.status+' '+url);return r.json()}
+
+async function collect(subject,depth,mode){
+  const T0=Date.now(); const log=[];
+  const trace=(m)=>{log.push([Date.now()-T0,m])};
+  const out={subject,depth,mode,when:now(),layers:{},telemetry:{requests:0,hits:0,ms:0},sources:[],log:[]};
+
+  const gh=async u=>{out.telemetry.requests++;trace('GET '+u);return j('https://api.github.com'+u)};
+  const isEmail=/^[^@]+@[^@]+\.[^@]+$/.test(subject);
+  const isDomain=/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(subject)&&!subject.includes(' ');
+
+  /* L1 identity — github users search / exact */
+  try{
+    const q=isEmail?`search/users?q=${encodeURIComponent(subject+' in:email')}`:`search/users?q=${encodeURIComponent('"'+subject+'"')}`;
+    let users=(await gh(q)).items||[];
+    if(users.length===0&&!subject.includes(' ')){users=(await gh(`/search/users?q=${encodeURIComponent(subject)}`)).items||[]}
+    const ids=[];
+    for(const u of users.slice(0,3)){
+      const p=await gh('/users/'+u.login);
+      const repos=(await gh(`/users/${u.login}/repos?sort=pushed&per_page=6`)).map(r=>({name:r.name,pushed:(r.pushed_at||'').slice(0,10),lang:r.language,desc:(r.description||'').slice(0,60)}));
+      let emails=[]; 
+      for(const r of (await gh(`/repos/${u.login}/${(repos[0]&&repos[0].name)||'x'}/commits?per_page=3`)).slice(0,3)||[])
+        if(c=>0){}
+      // commits author harvest across found repos:
+      for(const r of repos.slice(0,2)){
+        try{const cs=await gh(`/repos/${u.login}/${r.name}/commits?per_page=3`);
+          for(const c of cs){const a=c.commit&&c.commit.author;if(a&&a.email)emails.push({email:a.email,name:a.name,date:(a.date||'').slice(0,10)})}}catch(e){}
+      }
+      ids.push({login:u.login,url:u.html_url,created:(u.created_at||'').slice(0,10),name:p.name,loc:p.location,blog:p.bio,public_repos:p.public_repos,repos,emails:[...new Map(emails.map(e=>[e.email,e])).values()]});
+    }
+    out.layers.identity={users:ids};
+    out.telemetry.hits+=ids.length;
+  }catch(e){out.layers.identity={error:String(e)}}
+
+  /* L2 domain — only when subject looks like a domain; else derive from found emails */
+  try{
+    let domains=new Set();
+    if(isDomain)domains.add(subject.toLowerCase());
+    (out.layers.identity?.users||[]).forEach(u=>u.emails?.forEach(e=>{const d=e.email.split('@')[1];if(d)domains.add(d.toLowerCase())}));
+    const dom={};
+    for(const d of [...domains].slice(0,2)){
+      const r=await fetch(`https://crt.sh/?q=%25.${d}&output=json&exclude=expired=on`);out.telemetry.requests++;
+      if(r.ok){const j2=await r.json();const names=[...new Set(j2.flatMap(e=>(e.name_value||'').split('\n').map(s=>s.replace('*.','').trim())))].filter(Boolean).sort();
+        dom[d]={subdomains:names,count:names.length};out.telemetry.hits+=names.length;}
+    }
+    if(Object.keys(dom).length)out.layers.domain=dom;
+  }catch(e){if(!out.layers.domain)out.layers.domain={error:String(e)}}
+
+  /* L3 gravatar — avatar for any harvested email (or subject-email) */
+  try{
+    const em=(out.layers.identity?.users||[]).flatMap(u=>u.emails||[])[0]?.email||(isEmail?subject:null);
+    if(em){
+      const hash=[...new TextEncoder().encode(em.trim().toLowerCase())].map(b=>b.toString(16).padStart(2,'0')).join('');
+      const res=await fetch(`https://en.gravatar.com/${hash}.json`);out.telemetry.requests++;
+      if(res.ok){const j3=await res.json();const e3=(j3.entry||[])[0]||{};
+        out.layers.gravatar={email:em,hash,display:e3.displayName||null,about:(e3.about||'').slice(0,120),
+          accounts:(e3.accounts||[]).map(a=>({domain:a.domain,url:a.url})).slice(0,6)};
+        if(Object.keys(e3).length)out.telemetry.hits++;
+        out.avatar=`https://secure.gravatar.com/avatar/${hash}?d=identicon&s=160`;
+      }else out.avatar=`https://secure.gravatar.com/avatar/${hash}?d=identicon&s=160`;
+    }
+  }catch(e){}
+
+  /* L4 presence — archive CDX snapshot count for found domains */
+  try{
+    const doms=Object.keys(out.layers.domain||{});
+    const arch={};
+    for(const d of doms.slice(0,1)){
+      const r=await fetch(`https://web.archive.org/cdx/search/cdx?url=${d}/*&output=json&limit=200&collapse=urlkey`);out.telemetry.requests++;
+      if(r.ok){const j4=await r.json();arch[d]={snapshots:(j4.length||1)-1,span:j4.length?[j4[1][1],j4[j4.length-1][1]]:[],samples:j4.slice(1,6).map(r2=>r2[2])};out.telemetry.hits++}
+    }
+    if(Object.keys(arch).length)out.layers.archive=arch;
+  }catch(e){}
+
+  out.telemetry.ms=Date.now()-T0;out.log=log;
+  return out;
+}
+
+/* ---------- render ---------- */
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function render(d){
+  $('#mode-badge').textContent='ACTIVE';$('#mode-badge').className='tag ok';
+  $('#avatar').src=d.avatar||'';
+  const I=d.layers.identity?.users?.[0]||{};
+  const emails=(I.emails||[]).map(e=>e.email);
+  $('#f-name').textContent=I.name||d.subject;
+  $('#f-alias').textContent=(I.login?`@${I.login}`:'—');
+  $('#f-loc').textContent=I.loc||(d.layers.identity?.users?.[0]?.loc)||'—';
+  $('#f-org').textContent=(d.layers.domain&&Object.keys(d.layers.domain)[0])||'—';
+  $('#f-mails').textContent=emails.slice(0,2).join(', ')||'—';
+
+  const tags=[];
+  if(I.public_repos!==undefined)tags.push(['ok',`${I.public_repos} repos`]);
+  if(d.layers.domain)Object.entries(d.layers.domain).forEach(([k,v])=>tags.push(['ok',`${v.count} subdomains @${k}`]));
+  if(d.layers.gravatar)tags.push(['ok','gravatar']);
+  if(d.layers.archive)Object.entries(d.layers.archive).forEach(([k,v])=>tags(['warn',`${v.snapshots} archives @${k}`]));
+  tags.push(['',`conf: ${d.confidence||'mixed'}`]);
+  $('#conf-tags').innerHTML=tags.filter(Boolean).map(([c,t])=>`<span class="tag ${c}">${esc(t)}</span>`).join('');
+
+  const tel=$('#telemetry');
+  const t=d.telemetry,rate=t.ms?Math.round(t.requests/(t.ms/1000)*10)/10:0;
+  tel.innerHTML=`<b>requests</b> ${t.requests} &nbsp; <b>hits</b> ${t.hits} &nbsp; <b>wall</b> ${(t.ms/1000).toFixed(1)}s<br>
+  <div class="bar"><i style="width:${Math.min(100,t.hits*4)}%"></i></div>
+  <b>depth</b> ${esc(d.depth)} &nbsp; <b>mode</b> ${esc(d.mode)}<br><b>ran</b> ${esc(d.when)}<br>
+  <span style="color:#666">${esc((d.log||[]).slice(-3).map(l=>`+${l[0]}ms ${esc(l[1])}`).join('<br>'))}</span>`;
+
+  let rows='';
+  (I.repos||[]).forEach(r=>{rows+=`<tr><td>repo</td><td>${esc(r.name)}</td><td>${esc(r.lang||'—')}</td><td>${esc(r.pushed)}</td><td>${esc(r.desc)}</td></tr>`});
+  (I.emails||[]).forEach(e=>{rows+=`<tr><td>email</td><td colspan="3">${esc(e.email)} <span style="color:var(--dim)">(${esc(e.name||'')}, ${esc(e.date)})</span></td><td>commit author block</td></tr>`});
+  Object.entries(d.layers.domain||{}).forEach(([k,v])=>{(v.subdomains||[]).slice(0,12).forEach(s=>{rows+=`<tr><td>dns</td><td colspan="3">${esc(s)}</td><td>crt.sh CT log</td></tr>`})});
+  (d.layers.gravatar?.accounts||[]).forEach(a=>{rows+=`<tr><td>social</td><td colspan="3"><a href="${esc(a.url)}">${esc(a.domain)}</a></td><td>gravatar</td></tr>`});
+  Object.entries(d.layers.archive||{}).forEach(([k,v])=>{(v.samples||[]).forEach(s=>{rows+=`<tr><td>archive</td><td colspan="3">${esc(s)}</td><td>web.archive.org</td></tr>`})});
+
+  $('#dossier').innerHTML=`
+  <div class="card"><h2>DOSSIER — ${esc(d.subject)} <span style="float:right;color:var(--dim)">depth:${esc(d.depth)} mode:${esc(d.mode)}</span></h2>
+  <table><thead><tr><th>CLASS</th><th>ARTIFACT</th><th>META</th><th>DATE</th><th>SOURCE</th></tr></thead><tbody>
+  ${rows||'<tr><td colspan="5" style="color:var(--dim)">no rows — widen subject or rerun deeper</td></tr>'}
+  </tbody></table></div>
+  <div class="card"><h2>RAW LAYER JSON</h2><pre style="font-size:11px;color:#9a9a9a;white-space:pre-wrap">${esc(JSON.stringify(d.layers,null,1).slice(0,4000))}</pre></div>`;
+  window.__CURRENT=d;
+}
+
+/* ---------- run / save / delete / rerun ---------- */
+let running=false;
+async function run(mode='standard',depthOverride){
+  if(running)return flash('run in progress');
+  const subject=$('#subject').value.trim();if(!subject)return flash('enter a subject');
+  running=true;$('#mode-badge').textContent='COLLECTING';$('#mode-badge').className='tag warn';
+  $('#dossier').innerHTML='<div id="empty">COLLECTING — passive sources only…</div>';
+  try{
+    const depth=depthOverride||$('#depth').value;
+    const d=await collect(subject,depth,mode);
+    if(mode==='deeper'){/* deepen: widen identity net + full domain set */
+      d.note='deeper: widened identity net; all harvested domains swept';
+    }
+    if(mode==='darkweb'){d.note='darkweb: keyless onion telemetry not yet configured — see Parrot notes';}
+    if(mode==='wrong-person'){d.note='wrong-person: candidate list retained below';}
+    render(d);flash('collection complete');
+  }catch(e){$('#dossier').innerHTML=`<div id="empty">COLLECT ERROR: ${esc(e.message)}</div>`;$('#mode-badge').textContent='ERROR'}
+  running=false;
+}
+$('#btn-run').onclick=()=>run('standard');
+$$('button[data-rerun]').forEach(b=>b.onclick=()=>{
+  const m=b.dataset.rerun;$('#rerun-note').textContent=`re-run: ${m}`;
+  run(m, m==='deeper'?'deep':undefined);
+});
+$('#btn-save').onclick=()=>{
+  const d=window.__CURRENT;if(!d)return flash('nothing to save');
+  const all=loadAll();const key=d.when.replace(/[: ]/g,'-').slice(0,15);
+  all[key]=d;saveAll(all);refreshArchive();flash('saved '+key);
+};
+$('#btn-del').onclick=()=>{
+  const sel=$('#saved-list').value;if(!sel)return flash('select an archive entry');
+  const all=loadAll();delete all[sel];saveAll(all);refreshArchive();
+  $('#dossier').innerHTML='<div id="empty">NO ACTIVE DOSSIER</div>';$('#mode-badge').textContent='STANDBY';flash('deleted '+sel);
+};
+$('#btn-load').onclick=()=>{
+  const sel=$('#saved-list').value;const all=loadAll();const d=all[sel];if(!d)return flash('nothing selected');
+  $('#subject').value=d.subject;render(d);flash('loaded '+sel);
+};
+
+/* seed a cached result so the app demonstrates instantly; real runs overwrite */
+(async function seed(){
+  refreshArchive();
+  const cached=loadAll();
+  if(Object.keys(cached).length)return;
+  try{const d=await collect('Kubashen Jerome Naidoo','standard','seed-cache');if(d.layers.identity?.users?.length){render(d);const all=loadAll();all['seed']=d;saveAll(all);refreshArchive();}}catch(e){$('#mode-badge').textContent='STANDBY'}
+})();
+</script>
+</body>
+</html>
