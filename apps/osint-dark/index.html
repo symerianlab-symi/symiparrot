@@ -1,299 +1,339 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OSINT DARK — Agent Profile System</title>
+<title>OSINT DARK — Agent Profile System v2</title>
 <style>
 :root{
-  --bg:#161616; --panel:#1f1f1f; --panel2:#242424; --line:#333;
-  --txt:#c8c8c8; --dim:#8a8a8a; --acc:#7fb4d8; --ok:#7fc98f; --warn:#d8b46a; --bad:#d87f7f;
+  --bg:#141414; --panel:#1c1c1c; --panel2:#232323; --line:#2e2e2e; --line2:#3a3a3a;
+  --txt:#c9c9c9; --dim:#8b8b8b; --faint:#5c5c5c;
+  --acc:#82b8de; --acc2:#4f81a5; --ok:#82c995; --warn:#d9bb72; --bad:#d98a8a; --sel:#2a3f50;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--txt);font:14px/1.5 "SF Mono",Consolas,monospace;padding:18px;max-width:1100px;margin:0 auto}
-header{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px}
-h1{font-size:15px;letter-spacing:4px;color:#e8e8e8;font-weight:600}
-#datestamp{color:var(--dim);font-size:12px}
+html,body{height:100%}
+body{background:var(--bg);color:var(--txt);font:13px/1.5 "SF Mono",Consolas,"JetBrains Mono",monospace;display:flex;flex-direction:column}
+
+/* header */
+header{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding:10px 16px;background:var(--panel)}
+h1{font-size:14px;letter-spacing:5px;color:#ececec;font-weight:600}
+#datestamp{color:var(--dim);font-size:11px}
 .spacer{flex:1}
-button{background:var(--panel2);color:var(--txt);border:1px solid var(--line);padding:5px 12px;font:inherit;font-size:12px;cursor:pointer;border-radius:2px}
-button:hover{border-color:var(--acc);color:#fff}
+.badge{border:1px solid var(--line2);padding:2px 10px;font-size:11px;color:var(--dim)}
+.badge.ok{color:var(--ok);border-color:#2e4a33}.badge.warn{color:var(--warn);border-color:#4a3f2e}.badge.bad{color:var(--bad);border-color:#4a2e2e}
+
+/* toolbar */
+#toolbar{display:flex;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel2);flex-wrap:wrap;align-items:center}
+input,select,textarea{background:#101010;border:1px solid var(--line);color:var(--txt);padding:6px 9px;font:inherit;font-size:12px;border-radius:2px}
+input:focus,select:focus,textarea:focus{outline:1px solid var(--acc2);border-color:var(--acc2)}
+#subject{min-width:300px}
+button{background:#1a1a1a;color:var(--txt);border:1px solid var(--line2);padding:5px 13px;font:inherit;font-size:12px;cursor:pointer;border-radius:2px}
+button:hover{border-color:var(--acc);color:#fff;background:#202020}
 button.primary{border-color:#3a5a74;color:var(--acc)}
-button.danger:hover{border-color:var(--bad);color:var(--bad)}
-input,select{background:#111;border:1px solid var(--line);color:var(--txt);padding:5px 8px;font:inherit;font-size:12px;border-radius:2px}
-input:focus,select:focus{outline:1px solid var(--acc)}
-#toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
-#subject{min-width:260px}
-main{display:grid;grid-template-columns:300px 1fr;gap:14px}
-@media(max-width:800px){main{grid-template-columns:1fr}}
-.card{background:var(--panel);border:1px solid var(--line);padding:12px;margin-bottom:12px}
-.card h2{font-size:11px;letter-spacing:2px;color:var(--acc);border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:8px;font-weight:600}
-.kv{display:grid;grid-template-columns:110px 1fr;gap:3px 8px;font-size:12px}
+button.primary:hover{background:#16222c}
+button:disabled{opacity:.45;cursor:default}
+
+/* layout */
+#wrap{flex:1;display:grid;grid-template-columns:270px 1fr;min-height:0}
+nav#nav{border-right:1px solid var(--line);background:#181818;display:flex;flex-direction:column;min-height:0}
+nav .navhead{padding:8px 12px;font-size:10px;letter-spacing:2px;color:var(--faint);border-bottom:1px solid var(--line)}
+#sessions{flex:1;overflow-y:auto}
+.ses{padding:7px 12px;border-bottom:1px solid #202020;cursor:pointer;font-size:12px}
+.ses:hover{background:#1f1f1f}
+.ses.active{background:var(--sel);border-left:2px solid var(--acc)}
+.ses .t{color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ses .s{color:var(--faint);font-size:10px;margin-top:1px}
+.navfoot{padding:8px;border-top:1px solid var(--line);display:grid;gap:5px}
+.navfoot button{width:100%;font-size:11px}
+
+main{overflow-y:auto;padding:14px 18px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);padding:12px 14px;margin-bottom:14px}
+.card h2{font-size:10px;letter-spacing:2.5px;color:var(--acc2);border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:10px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.card h2 .cnt{color:var(--faint);letter-spacing:0}
+
+/* candidates */
+.cand{display:flex;gap:10px;padding:8px;border:1px solid var(--line);margin-bottom:6px;background:#191919;align-items:flex-start}
+.cand:hover{border-color:var(--line2)}
+.cand.pick{border-color:var(--acc);background:var(--sel)}
+.cand img{width:44px;height:44px;border:1px solid var(--line);background:#0e0e0e}
+.cand .body{flex:1;min-width:0}
+.cand .nm{color:#e6e6e6;font-size:13px}
+.cand .meta{color:var(--dim);font-size:11px;margin-top:1px}
+.cand .code{font-size:16px;color:var(--acc);border:1px solid #2e4a5c;background:#12202b;padding:2px 8px;letter-spacing:1px}
+.cand .score{color:var(--warn);font-size:10px;margin-left:6px}
+#hints textarea{width:100%;min-height:44px;resize:vertical}
+.hrow{display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;margin-bottom:5px;font-size:11px;color:var(--dim)}
+.hrow input{width:100%}
+
+/* profile + tables */
+.kv{display:grid;grid-template-columns:120px 1fr;gap:3px 10px;font-size:12px}
 .kv b{color:var(--dim);font-weight:400}
-.avatar{width:96px;height:96px;border:1px solid var(--line);background:#111;object-fit:cover;display:block;margin:0 auto 8px}
-.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
-.tag{border:1px solid var(--line);padding:1px 7px;font-size:11px;color:var(--dim);border-radius:2px}
-.tag.ok{color:var(--ok);border-color:#2e4a33}.tag.warn{color:var(--warn);border-color:#4a3f2e}.tag.bad{color:var(--bad);border-color:#4a2e2e}
+.avatar-lg{width:110px;height:110px;border:1px solid var(--line2);background:#0e0e0e;object-fit:cover;float:right;margin:0 0 8px 10px}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th{text-align:left;color:var(--dim);font-weight:400;border-bottom:1px solid var(--line);padding:3px 6px;letter-spacing:1px}
-td{border-bottom:1px solid #222;padding:4px 6px;vertical-align:top}
-tr:hover td{background:#202020}
+th{text-align:left;color:var(--faint);font-weight:400;border-bottom:1px solid var(--line2);padding:3px 7px;letter-spacing:1px;font-size:10px}
+td{border-bottom:1px solid #222;padding:4px 7px;vertical-align:top;color:#bdbdbd}
+tr:hover td{background:#1f1f1f}
 a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
-#telemetry{font-size:11px;color:var(--dim)}
-#telemetry b{color:var(--txt)}
-.bar{height:4px;background:#111;margin:3px 0 8px}.bar i{display:block;height:4px;background:var(--acc)}
-#empty{color:var(--dim);padding:40px;text-align:center;border:1px dashed var(--line)}
-footer{margin-top:14px;color:#555;font-size:11px;border-top:1px solid var(--line);padding-top:8px}
-.flash{position:fixed;bottom:18px;right:18px;background:var(--panel2);border:1px solid var(--acc);padding:8px 14px;font-size:12px;display:none}
-.rerun-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-dialog{background:var(--panel);color:var(--txt);border:1px solid var(--line);padding:18px;max-width:420px}
-dialog::backdrop{background:rgba(0,0,0,.6)}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{border:1px solid var(--line2);padding:1px 8px;font-size:10px;color:var(--dim)}
+.tag.ok{color:var(--ok);border-color:#2e4a33}.tag.warn{color:var(--warn);border-color:#4a3f2e}.tag.bad{color:var(--bad);border-color:#4a2e2e}
+
+/* telemetry bars */
+.trow{display:grid;grid-template-columns:110px 1fr 70px;gap:8px;align-items:center;font-size:11px;margin-bottom:4px;color:var(--dim)}
+.bar{height:5px;background:#101010;border:1px solid #222}
+.bar i{display:block;height:100%;background:var(--acc2)}
+#netlog{font-size:10px;color:#6a6a6a;max-height:110px;overflow-y:auto;margin-top:6px;border-top:1px dashed #222;padding-top:5px}
+#netlog div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#netlog b{color:#9a9a9a;font-weight:400}
+
+footer{border-top:1px solid var(--line);padding:6px 16px;color:#4e4e4e;font-size:10px;display:flex;gap:14px}
+.flash{position:fixed;bottom:16px;right:16px;background:#202020;border:1px solid var(--acc);color:var(--acc);padding:8px 16px;font-size:12px;display:none;z-index:9}
+#empty{color:var(--faint);padding:60px 20px;text-align:center;border:1px dashed var(--line);margin:20px}
+code.codechip{color:var(--acc);background:#12202b;padding:0 5px;border:1px solid #2e4a5c}
 </style>
 </head>
 <body>
 <header>
   <h1>OSINT DARK</h1><span id="datestamp"></span><div class="spacer"></div>
-  <span id="mode-badge" class="tag">STANDBY</span>
+  <span id="mode" class="badge">STANDBY</span>
 </header>
 
 <div id="toolbar">
-  <input id="subject" placeholder="subject: name / handle / domain / email" value="Kubashen Jerome Naidoo">
-  <select id="depth">
-    <option value="standard">standard</option>
-    <option value="deep">deep</option>
-  </select>
-  <button class="primary" id="btn-run">&#9654; RUN</button>
-  <button id="btn-save">SAVE</button>
-  <button class="danger" id="btn-del">DELETE</button>
+  <input id="subject" placeholder="subject: name / handle / domain / email" style="flex:1;min-width:260px">
+  <select id="depth"><option value="standard">standard</option><option value="deep">deep</option></select>
+  <button class="primary" id="b-run">&#9654; FIND PEOPLE</button>
+  <button id="b-none" title="mark candidates stage done, none match">NONE MATCH</button>
+  <button id="b-save">SAVE</button>
+  <button id="b-del">DEL</button>
 </div>
 
-<main>
-  <aside>
-    <div class="card" id="idcard">
-      <h2>SUBJECT</h2>
-      <img class="avatar" id="avatar" alt="">
-      <div class="kv">
-        <b>NAME</b><span id="f-name">—</span>
-        <b>ALIASES</b><span id="f-alias">—</span>
-        <b>LOCATION</b><span id="f-loc">—</span>
-        <b>EMPLOYER</b><span id="f-org">—</span>
-        <b>EMAILS</b><span id="f-mails">—</span>
-      </div>
-      <div class="tags" id="conf-tags"></div>
+<div id="wrap">
+  <nav id="nav">
+    <div class="navhead">SESSIONS</div>
+    <div id="sessions"></div>
+    <div class="navfoot">
+      <button id="b-new">+ NEW SESSION</button>
+      <button id="b-export">EXPORT JSON</button>
     </div>
-    <div class="card">
-      <h2>TELEMETRY</h2>
-      <div id="telemetry">no run yet</div>
-    </div>
-    <div class="card">
-      <h2>RE-RUN</h2>
-      <div class="rerun-row">
-        <button data-rerun="wrong-person">wrong person</button>
-        <button data-rerun="deeper">deeper dive</button>
-        <button data-rerun="darkweb">darkweb</button>
-      </div>
-      <div id="rerun-note" style="color:var(--dim);font-size:11px;margin-top:6px"></div>
-    </div>
-    <div class="card">
-      <h2>ARCHIVE</h2>
-      <select id="saved-list" size="4" style="width:100%"></select>
-      <div class="rerun-row" style="margin-top:6px">
-        <button id="btn-load">LOAD</button>
-      </div>
-    </div>
-  </aside>
+  </nav>
 
-  <section id="dossier"><div id="empty">NO ACTIVE DOSSIER — RUN A COLLECTION</div></section>
-</main>
+  <main id="main">
+    <div id="empty">NO SESSION — enter a subject and FIND PEOPLE</div>
+  </main>
+</div>
 
-<footer>symiparrot // osint-dark 1.0 // all data collected passively, sources cited in-record</footer>
+<footer><span>symiparrot // osint-dark v2</span><span>passive collection // sources in-row</span><span id="fcount"></span></footer>
 <div class="flash" id="flash"></div>
 
 <script>
 'use strict';
-const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
-const LS_KEY='osint-dark-saves-v1';
-
-/* ---------- date ---------- */
+/* ============ OSINT DARK v2 — candidates first, code-pick workflow ============ */
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const LS='osint-dark-v2';
 const now=()=>new Date().toISOString().replace('T',' ').slice(0,16)+'Z';
-$('#datestamp').textContent=now();
-
-/* ---------- persistence (localStorage, JSON) ---------- */
-const loadAll=()=>{try{return JSON.parse(localStorage.getItem(LS_KEY))||{}}catch{return{}}};
-const saveAll=o=>localStorage.setItem(LS_KEY,JSON.stringify(o));
-function refreshArchive(){
-  const all=loadAll(),sel=$('#saved-list');sel.innerHTML='';
-  Object.keys(all).sort().forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=`${k} — ${all[k].subject}`;sel.append(o)});
-}
-function flash(msg){const f=$('#flash');f.textContent=msg;f.style.display='block';setTimeout(()=>f.style.display='none',1800)}
-
-/* ---------- the collection engine (browser-side, passive, keyless) ---------- */
-async function j(url,opt){const r=await fetch(url,opt);if(!r.ok)throw new Error(r.status+' '+url);return r.json()}
-
-async function collect(subject,depth,mode){
-  const T0=Date.now(); const log=[];
-  const trace=(m)=>{log.push([Date.now()-T0,m])};
-  const out={subject,depth,mode,when:now(),layers:{},telemetry:{requests:0,hits:0,ms:0},sources:[],log:[]};
-
-  const gh=async u=>{out.telemetry.requests++;trace('GET '+u);return j('https://api.github.com'+u)};
-  const isEmail=/^[^@]+@[^@]+\.[^@]+$/.test(subject);
-  const isDomain=/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(subject)&&!subject.includes(' ');
-
-  /* L1 identity — github users search / exact */
-  try{
-    const q=isEmail?`search/users?q=${encodeURIComponent(subject+' in:email')}`:`search/users?q=${encodeURIComponent('"'+subject+'"')}`;
-    let users=(await gh(q)).items||[];
-    if(users.length===0&&!subject.includes(' ')){users=(await gh(`/search/users?q=${encodeURIComponent(subject)}`)).items||[]}
-    const ids=[];
-    for(const u of users.slice(0,3)){
-      const p=await gh('/users/'+u.login);
-      const repos=(await gh(`/users/${u.login}/repos?sort=pushed&per_page=6`)).map(r=>({name:r.name,pushed:(r.pushed_at||'').slice(0,10),lang:r.language,desc:(r.description||'').slice(0,60)}));
-      let emails=[]; 
-      for(const r of (await gh(`/repos/${u.login}/${(repos[0]&&repos[0].name)||'x'}/commits?per_page=3`)).slice(0,3)||[])
-        if(c=>0){}
-      // commits author harvest across found repos:
-      for(const r of repos.slice(0,2)){
-        try{const cs=await gh(`/repos/${u.login}/${r.name}/commits?per_page=3`);
-          for(const c of cs){const a=c.commit&&c.commit.author;if(a&&a.email)emails.push({email:a.email,name:a.name,date:(a.date||'').slice(0,10)})}}catch(e){}
-      }
-      ids.push({login:u.login,url:u.html_url,created:(u.created_at||'').slice(0,10),name:p.name,loc:p.location,blog:p.bio,public_repos:p.public_repos,repos,emails:[...new Map(emails.map(e=>[e.email,e])).values()]});
-    }
-    out.layers.identity={users:ids};
-    out.telemetry.hits+=ids.length;
-  }catch(e){out.layers.identity={error:String(e)}}
-
-  /* L2 domain — only when subject looks like a domain; else derive from found emails */
-  try{
-    let domains=new Set();
-    if(isDomain)domains.add(subject.toLowerCase());
-    (out.layers.identity?.users||[]).forEach(u=>u.emails?.forEach(e=>{const d=e.email.split('@')[1];if(d)domains.add(d.toLowerCase())}));
-    const dom={};
-    for(const d of [...domains].slice(0,2)){
-      const r=await fetch(`https://crt.sh/?q=%25.${d}&output=json&exclude=expired=on`);out.telemetry.requests++;
-      if(r.ok){const j2=await r.json();const names=[...new Set(j2.flatMap(e=>(e.name_value||'').split('\n').map(s=>s.replace('*.','').trim())))].filter(Boolean).sort();
-        dom[d]={subdomains:names,count:names.length};out.telemetry.hits+=names.length;}
-    }
-    if(Object.keys(dom).length)out.layers.domain=dom;
-  }catch(e){if(!out.layers.domain)out.layers.domain={error:String(e)}}
-
-  /* L3 gravatar — avatar for any harvested email (or subject-email) */
-  try{
-    const em=(out.layers.identity?.users||[]).flatMap(u=>u.emails||[])[0]?.email||(isEmail?subject:null);
-    if(em){
-      const hash=[...new TextEncoder().encode(em.trim().toLowerCase())].map(b=>b.toString(16).padStart(2,'0')).join('');
-      const res=await fetch(`https://en.gravatar.com/${hash}.json`);out.telemetry.requests++;
-      if(res.ok){const j3=await res.json();const e3=(j3.entry||[])[0]||{};
-        out.layers.gravatar={email:em,hash,display:e3.displayName||null,about:(e3.about||'').slice(0,120),
-          accounts:(e3.accounts||[]).map(a=>({domain:a.domain,url:a.url})).slice(0,6)};
-        if(Object.keys(e3).length)out.telemetry.hits++;
-        out.avatar=`https://secure.gravatar.com/avatar/${hash}?d=identicon&s=160`;
-      }else out.avatar=`https://secure.gravatar.com/avatar/${hash}?d=identicon&s=160`;
-    }
-  }catch(e){}
-
-  /* L4 presence — archive CDX snapshot count for found domains */
-  try{
-    const doms=Object.keys(out.layers.domain||{});
-    const arch={};
-    for(const d of doms.slice(0,1)){
-      const r=await fetch(`https://web.archive.org/cdx/search/cdx?url=${d}/*&output=json&limit=200&collapse=urlkey`);out.telemetry.requests++;
-      if(r.ok){const j4=await r.json();arch[d]={snapshots:(j4.length||1)-1,span:j4.length?[j4[1][1],j4[j4.length-1][1]]:[],samples:j4.slice(1,6).map(r2=>r2[2])};out.telemetry.hits++}
-    }
-    if(Object.keys(arch).length)out.layers.archive=arch;
-  }catch(e){}
-
-  out.telemetry.ms=Date.now()-T0;out.log=log;
-  return out;
-}
-
-/* ---------- render ---------- */
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function render(d){
-  $('#mode-badge').textContent='ACTIVE';$('#mode-badge').className='tag ok';
-  $('#avatar').src=d.avatar||'';
-  const I=d.layers.identity?.users?.[0]||{};
-  const emails=(I.emails||[]).map(e=>e.email);
-  $('#f-name').textContent=I.name||d.subject;
-  $('#f-alias').textContent=(I.login?`@${I.login}`:'—');
-  $('#f-loc').textContent=I.loc||(d.layers.identity?.users?.[0]?.loc)||'—';
-  $('#f-org').textContent=(d.layers.domain&&Object.keys(d.layers.domain)[0])||'—';
-  $('#f-mails').textContent=emails.slice(0,2).join(', ')||'—';
+const flash=m=>{const f=$('#flash');f.textContent=m;f.style.display='block;';f.style.display='block';setTimeout(()=>f.style.display='none',2200)};
+$('#datestamp').textContent=now();setInterval(()=>$('#datestamp').textContent=now(),30000);
 
-  const tags=[];
-  if(I.public_repos!==undefined)tags.push(['ok',`${I.public_repos} repos`]);
-  if(d.layers.domain)Object.entries(d.layers.domain).forEach(([k,v])=>tags.push(['ok',`${v.count} subdomains @${k}`]));
-  if(d.layers.gravatar)tags.push(['ok','gravatar']);
-  if(d.layers.archive)Object.entries(d.layers.archive).forEach(([k,v])=>tags(['warn',`${v.snapshots} archives @${k}`]));
-  tags.push(['',`conf: ${d.confidence||'mixed'}`]);
-  $('#conf-tags').innerHTML=tags.filter(Boolean).map(([c,t])=>`<span class="tag ${c}">${esc(t)}</span>`).join('');
+/* ---------- store: sessions[] with stages ---------- */
+const store={
+  all:()=>{try{return JSON.parse(localStorage.getItem(LS))||{sessions:[]}}catch{return{sessions:[]}}},
+  save:d=>localStorage.setItem(LS,JSON.stringify(d)),
+};
+let S=null; // current session {id,subject,created,stage,candidates[],picked,hints{},dossier,telemetry,netlog}
 
-  const tel=$('#telemetry');
-  const t=d.telemetry,rate=t.ms?Math.round(t.requests/(t.ms/1000)*10)/10:0;
-  tel.innerHTML=`<b>requests</b> ${t.requests} &nbsp; <b>hits</b> ${t.hits} &nbsp; <b>wall</b> ${(t.ms/1000).toFixed(1)}s<br>
-  <div class="bar"><i style="width:${Math.min(100,t.hits*4)}%"></i></div>
-  <b>depth</b> ${esc(d.depth)} &nbsp; <b>mode</b> ${esc(d.mode)}<br><b>ran</b> ${esc(d.when)}<br>
-  <span style="color:#666">${esc((d.log||[]).slice(-3).map(l=>`+${l[0]}ms ${esc(l[1])}`).join('<br>'))}</span>`;
+function newSession(subject){return{id:'s'+Date.now().toString(36),subject,created:now(),stage:'idle',candidates:[],picked:null,
+  hints:{text:'',phone:'',location:'',school:'',links:''},dossier:null,telemetry:null,netlog:[]}}
 
-  let rows='';
-  (I.repos||[]).forEach(r=>{rows+=`<tr><td>repo</td><td>${esc(r.name)}</td><td>${esc(r.lang||'—')}</td><td>${esc(r.pushed)}</td><td>${esc(r.desc)}</td></tr>`});
-  (I.emails||[]).forEach(e=>{rows+=`<tr><td>email</td><td colspan="3">${esc(e.email)} <span style="color:var(--dim)">(${esc(e.name||'')}, ${esc(e.date)})</span></td><td>commit author block</td></tr>`});
-  Object.entries(d.layers.domain||{}).forEach(([k,v])=>{(v.subdomains||[]).slice(0,12).forEach(s=>{rows+=`<tr><td>dns</td><td colspan="3">${esc(s)}</td><td>crt.sh CT log</td></tr>`})});
-  (d.layers.gravatar?.accounts||[]).forEach(a=>{rows+=`<tr><td>social</td><td colspan="3"><a href="${esc(a.url)}">${esc(a.domain)}</a></td><td>gravatar</td></tr>`});
-  Object.entries(d.layers.archive||{}).forEach(([k,v])=>{(v.samples||[]).forEach(s=>{rows+=`<tr><td>archive</td><td colspan="3">${esc(s)}</td><td>web.archive.org</td></tr>`})});
+/* ---------- network engine (browser, passive, keyless) ---------- */
+const NET={n:0,hits:0,t0:0,log:[]};
+async function gh(path){NET.n++;netlog('GET github'+path);const r=await fetch('https://api.github.com'+path);if(!r.ok)throw new Error('gh '+r.status+' '+path);return r.json()}
+async function ghTry(path){try{return await gh(path)}catch{return null}}
+function netlog(m){NET.log.unshift([Date.now()-NET.t0,m]);if(NET.log.length>40)NET.log.pop();paintNet()}
+function paintNet(){const el=$('#netlog');if(el)el.innerHTML=NET.log.map(l=>`<div><b>+${l[0]}ms</b> ${esc(l[1])}</div>`).join('')}
+/* gravatar hash via crypto.subtle (async MD5) */
+async function md5hex(str){const buf=await crypto.subtle.digest("MD5",new TextEncoder().encode(str));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("")}
+async function gravatarHash(email){return md5hex(email.trim().toLowerCase())}
 
-  $('#dossier').innerHTML=`
-  <div class="card"><h2>DOSSIER — ${esc(d.subject)} <span style="float:right;color:var(--dim)">depth:${esc(d.depth)} mode:${esc(d.mode)}</span></h2>
-  <table><thead><tr><th>CLASS</th><th>ARTIFACT</th><th>META</th><th>DATE</th><th>SOURCE</th></tr></thead><tbody>
-  ${rows||'<tr><td colspan="5" style="color:var(--dim)">no rows — widen subject or rerun deeper</td></tr>'}
-  </tbody></table></div>
-  <div class="card"><h2>RAW LAYER JSON</h2><pre style="font-size:11px;color:#9a9a9a;white-space:pre-wrap">${esc(JSON.stringify(d.layers,null,1).slice(0,4000))}</pre></div>`;
-  window.__CURRENT=d;
+
+/* collect CANDIDATES: broad, shallow, scored. Never auto-picks. */
+async function findCandidates(subject,depth){
+  NET.n=0;NET.hits=0;NET.t0=Date.now();NET.log=[];
+  const cands=[];const seen=new Set();
+  const add=c=>{const k=(c.handle||c.name||'').toLowerCase();if(k&&!seen.has(k)){seen.add(k);cands.push(c)}};
+  const terms=[subject];
+  if(subject.includes(' ')){const parts=subject.split(/\s+/);if(parts.length>=2)terms.push(parts[0]+' '+parts[parts.length-1]);parts.forEach(p=>{if(p.length>2)terms.push(p)})}
+
+  for(const t of [...new Set(terms)].slice(0,3)){
+    try{const r=await gh(`/search/users?q=${encodeURIComponent(t)}`);
+      for(const u of (r.items||[]).slice(0,8)){
+        if(seen.has(u.login.toLowerCase()))continue;seen.add(u.login.toLowerCase());
+        let p=null;try{p=await gh('/users/'+u.login)}catch{}
+        const score=(u.login.toLowerCase()===t.toLowerCase()?3:0)+(p?.name&&p.name.toLowerCase().includes(t.split(' ')[0].toLowerCase())?2:0);
+        add({src:'github',handle:u.login,url:`https://github.com/${u.login}`,name:p?.name||u.login,loc:p?.location||'',created:(u.created_at||'').slice(0,10),repos:p?.public_repos??'?',score});
+      }}catch(e){netlog('ERR gh search '+e.message)}
+  }
+  /* enrich top candidates: repos + commit emails (the identity gold) */
+  for(const c of cands.slice(0,4)){
+    if(c.src!=='github')continue;
+    try{const repos=await gh(`/users/${c.handle}/repos?sort=pushed&per_page=5`);c.topRepos=repos.slice(0,3).map(r=>({name:r.name,pushed:(r.pushed_at||'').slice(0,10),lang:r.language}));
+      const emails=new Map();
+      for(const r of repos.slice(0,2)){const cs=await ghTry(`/repos/${c.handle}/${r.name}/commits?per_page=4`)||[];
+        for(const cm of cs){const a=cm.commit?.author;if(a?.email)emails.set(a.email,{email:a.email,name:a.name,date:(a.date||'').slice(0,10)})}}
+      c.emails=[...emails.values()];NET.hits+=c.emails.length;}catch(e){}
+  }
+  /* hints-driven extra probes: phone→nothing keyless; location/school bias scoring; links→direct fetch */
+  const H=S?.hints||{};
+  if(H.links)for(const url of H.links.split(/[\s,]+/).filter(Boolean).slice(0,3)){try{const r=await fetch(url);netlog('GET hint-link '+url);if(r.ok)NET.hits++}catch{}}
+  /* score vs hints */
+  for(const c of cands){
+    let s=c.score||0;const hay=(c.name+' '+(c.loc||'')+' '+(c.handle||'')).toLowerCase();
+    if(H.location&&hay.includes(H.location.toLowerCase()))s+=3;
+    if(H.text)for(const w of H.text.toLowerCase().split(/\s+/).filter(w=>w.length>3))if(hay.includes(w))s+=1;
+    c.score=s;
+  }
+  cands.sort((a,b)=>(b.score||0)-(a.score||0));
+  return{candidates:cands,telemetry:{requests:NET.n,hits:NET.hits,ms:Date.now()-NET.t0,cands:cands.length}};
 }
 
-/* ---------- run / save / delete / rerun ---------- */
-let running=false;
-async function run(mode='standard',depthOverride){
-  if(running)return flash('run in progress');
-  const subject=$('#subject').value.trim();if(!subject)return flash('enter a subject');
-  running=true;$('#mode-badge').textContent='COLLECTING';$('#mode-badge').className='tag warn';
-  $('#dossier').innerHTML='<div id="empty">COLLECTING — passive sources only…</div>';
-  try{
-    const depth=depthOverride||$('#depth').value;
-    const d=await collect(subject,depth,mode);
-    if(mode==='deeper'){/* deepen: widen identity net + full domain set */
-      d.note='deeper: widened identity net; all harvested domains swept';
-    }
-    if(mode==='darkweb'){d.note='darkweb: keyless onion telemetry not yet configured — see Parrot notes';}
-    if(mode==='wrong-person'){d.note='wrong-person: candidate list retained below';}
-    render(d);flash('collection complete');
-  }catch(e){$('#dossier').innerHTML=`<div id="empty">COLLECT ERROR: ${esc(e.message)}</div>`;$('#mode-badge').textContent='ERROR'}
-  running=false;
+/* deep-dive a picked handle: full profile + repos + emails + domain CT + gravatar + archive */
+async function deepDive(handle){
+  NET.n=0;NET.hits=0;NET.t0=Date.now();NET.log=[];
+  const p=await gh('/users/'+handle);
+  const repos=await gh(`/users/${handle}/repos?sort=pushed&per_page=10`);
+  const emails=new Map();const repoRows=[];
+  for(const r of repos){
+    repoRows.push({name:r.name,pushed:(r.pushed_at||'').slice(0,10),lang:r.language,desc:(r.description||'').slice(0,70)});
+    const cs=await ghTry(`/repos/${handle}/${r.name}/commits?per_per=6`.replace('per_per','per_page'))||[];
+    for(const cm of cs){const a=cm.commit?.author;if(a?.email)emails.set(a.email,{...a,date:(a.date||'').slice(0,10)})}
+  }
+  const domains=new Set();emails.forEach(e=>{const d=e.email?.split('@')[1];if(d&&d!=='')domains.add(d.toLowerCase())});
+  const subdomains={};
+  for(const d of [...domains].slice(0,2)){
+    try{const r=await fetch(`https://crt.sh/?q=%25.${d}&output=json`);NET.n++;if(r.ok){const j=await r.json();
+      subdomains[d]=[...new Set(j.flatMap(e=>(e.name_value||'').split('\n').map(x=>x.replace('*.','').trim())))].filter(Boolean).sort();NET.hits+=subdomains[d].length}}catch{}
+  }
+  const topEmail=emails.keys().next().value;
+  let grav=null,avatar=null;
+  if(topEmail){const h=await gravatarHash(topEmail);avatar=`https://secure.gravatar.com/avatar/${h}?d=identicon&s=160`;
+    try{const r=await fetch(`https://en.gravatar.com/${h}.json`);NET.n++;if(r.ok){const j=await r.json();const e0=(j.entry||[])[0];if(e0)grav={email:topEmail,display:e0.displayName,accounts:(e0.accounts||[]).slice(0,6)}}}catch{}}
+  return{profile:{login:handle,name:p.name,loc:p.location,bio:p.blog,created:(p.created_at||'').slice(0,10),repos:p.public_repos,followers:p.followers},repoRows,emails:[...emails.values()],domains:[...domains],subdomains,grav,avatar,
+    telemetry:{requests:NET.n,hits:NET.hits,ms:Date.now()-NET.t0}};
 }
-$('#btn-run').onclick=()=>run('standard');
-$$('button[data-rerun]').forEach(b=>b.onclick=()=>{
-  const m=b.dataset.rerun;$('#rerun-note').textContent=`re-run: ${m}`;
-  run(m, m==='deeper'?'deep':undefined);
-});
-$('#btn-save').onclick=()=>{
-  const d=window.__CURRENT;if(!d)return flash('nothing to save');
-  const all=loadAll();const key=d.when.replace(/[: ]/g,'-').slice(0,15);
-  all[key]=d;saveAll(all);refreshArchive();flash('saved '+key);
-};
-$('#btn-del').onclick=()=>{
-  const sel=$('#saved-list').value;if(!sel)return flash('select an archive entry');
-  const all=loadAll();delete all[sel];saveAll(all);refreshArchive();
-  $('#dossier').innerHTML='<div id="empty">NO ACTIVE DOSSIER</div>';$('#mode-badge').textContent='STANDBY';flash('deleted '+sel);
-};
-$('#btn-load').onclick=()=>{
-  const sel=$('#saved-list').value;const all=loadAll();const d=all[sel];if(!d)return flash('nothing selected');
-  $('#subject').value=d.subject;render(d);flash('loaded '+sel);
-};
 
-/* seed a cached result so the app demonstrates instantly; real runs overwrite */
-(async function seed(){
-  refreshArchive();
-  const cached=loadAll();
-  if(Object.keys(cached).length)return;
-  try{const d=await collect('Kubashen Jerome Naidoo','standard','seed-cache');if(d.layers.identity?.users?.length){render(d);const all=loadAll();all['seed']=d;saveAll(all);refreshArchive();}}catch(e){$('#mode-badge').textContent='STANDBY'}
+/* ============ render ============ */
+function badge(t,cls){const b=$('#mode');b.textContent=t;b.className='badge '+(cls||'')}
+function navPaint(){
+  const all=store.all().sessions;
+  $('#sessions').innerHTML=all.map(s=>`<div class="ses ${S&&s.id===S.id?'active':''}" data-id="${s.id}">
+    <div class="t">${esc(s.stage==='picked'&&s.dossier?'★ '+s.subject:s.subject)}</div>
+    <div class="s">${esc(s.stage)} · ${s.candidates?.length||0} cands · ${esc((s.created||'').slice(5,10))}</div></div>`).join('')
+    ||'<div style="padding:10px;color:var(--faint);font-size:11px">no sessions</div>';
+  $$('#sessions .ses').forEach(el=>el.onclick=()=>{const s=store.all().sessions.find(x=>x.id===el.dataset.id);if(s){S=structuredClone(s);renderAll()}});
+  $('#fcount').textContent=all.length+' archived';
+}
+function hintsPaint(){
+  const h=S?.hints||{};
+  $('#hints').innerHTML=`
+  <div class="hrow"><span>more info</span><input id="h-text" value="${esc(h.text||'')}" placeholder="keywords, employer, nickname…"></div>
+  <div class="hrow"><span>phone</span><input id="h-phone" value="${esc(h.phone||'')}" placeholder="+27 …"></div>
+  <div class="hrow"><span>location</span><input id="h-loc" value="${esc(h.location||'')}" placeholder="city / country"></div>
+  <div class="hrow"><span>school</span><input id="h-school" value="${esc(h.school||'')}" placeholder="institution"></div>
+  <div class="hrow"><span>links</span><input id="h-links" value="${esc(h.links||'')}" placeholder="known urls, comma separated"></div>
+  <div class="hrow"><span></span><button id="h-apply" style="width:100%">APPLY HINTS → RE-SCORE</button></div>`;
+  $('#h-apply').onclick=()=>{S.hints={text:$('#h-text').value,phone:$('#h-phone').value,location:$('#h-loc').value,school:$('#h-school').value,links:$('#h-links').value};persist();flash('hints stored — they bias the next FIND')};
+}
+async function candPaint(){
+  const el=$('#cands');if(!el)return;
+  if(!S.candidates?.length){el.innerHTML='<div style="color:var(--faint);font-size:11px;padding:8px">no candidates yet — FIND PEOPLE first</div>';return}
+  let htmlOut='';
+  for(const [idx,c] of S.candidates.entries()){const i=idx;
+    const code='P'+String(i+1).padStart(2,'0');
+    const gv=(c.emails&&c.emails[0])?await gravatarHash(c.emails[0].email):null;
+    c.code=code;
+    const gravatar=c.emails?.[0]?`https://secure.gravatar.com/avatar/${await gravatarHash(c.emails[0].email)}?d=identicon&s=80`:''; 
+    const row=`<div class="cand ${S.picked&&S.picked.handle===c.handle?'pick':''}" data-i="${i}">
+      ${gravatar?`<img src="${gravatar}">`:''}
+      <div class="body">
+        <div class="nm">${esc(c.name||c.handle)} <span class="score">match ${c.score||0}</span></div>
+        <div class="meta">@${esc(c.handle)} · ${esc(c.loc||'loc?')} · since ${esc(c.created||'?')} · ${esc(c.repos??'?')} repos</div>
+        ${c.emails?.length?`<div class="meta">${c.emails.slice(0,2).map(e=>esc(e.email)).join(' · ')}</div>`:''}
+      </div>
+      <div style="text-align:right"><div class="code">${code}</div><button data-pick="${i}" style="font-size:10px;padding:2px 8px;margin-top:4px">PICK</button></div>
+    </div>`;htmlOut+=row;}
+  el.innerHTML=htmlOut;
+  $$('#cands [data-pick]').forEach(b=>b.onclick=async()=>{
+    const i=+b.dataset.pick;S.picked=S.candidates[i];
+    badge('DEEP DIVING','warn');
+    try{S.dossier=await deepDive(S.picked.handle);S.stage='picked';persist();renderAll();flash('deep dive complete — '+S.picked.handle)}
+    catch(e){badge('ERROR','bad');flash(e.message)}
+  });
+}
+function telPaint(){
+  const t=S?.telemetry||S?.dossier?.telemetry;const el='#telemetry';
+  if(!t){$(el).innerHTML='<span style="color:var(--faint)">no run yet</span>';return}
+  const pct=Math.min(100,Math.round((t.hits||0)/Math.max(1,(t.requests||1))*100));
+  $(el).innerHTML=`
+  ${['requests|'+t.requests,'artifacts|'+t.hits,'candidates|'+(S?.candidates?.length||0)].map(r=>{const[k,v]=r.split('|');return`<div class="trow"><span>${k}</span><div class="bar"><i style="width:${Math.min(100,v*4)}%"></i></div><span>${v}</span></div>`}).join('')}
+  <div class="trow"><span>wall clock</span><div class="bar"><i style="width:${pct}%"></i></div><span>${((t.ms||0)/1000).toFixed(1)}s</span></div>`;
+}
+function dossierPaint(){
+  const el='#dossier';const D=S?.dossier;
+  if(!D){$(el).innerHTML='<div id="empty">no deep-dive yet — pick a candidate code</div>';return}
+  const P=D.profile;let rows='';
+  D.repoRows.forEach(r=>rows+=`<tr><td>repo</td><td>${esc(r.name)}</td><td>${esc(r.lang||'—')}</td><td>${esc(r.pushed)}</td><td>${esc(r.desc||'')}</td></tr>`);
+  D.emails.forEach(e=>rows+=`<tr><td>email</td><td colspan=2>${esc(e.email)} <span style="color:var(--dim)">${esc(e.name||'')}</span></td><td>${esc(e.date||'')}</td><td>commit author</td></tr>`);
+  Object.entries(D.subdomains||{}).forEach(([d,list])=>list.slice(0,10).forEach(s=>rows+=`<tr><td>dns</td><td colspan=3>${esc(s)}</td><td>crt.sh @${esc(d)}</td>`));
+  (D.grav?.accounts||[]).forEach(a=>rows+=`<tr><td>social</td><td colspan=3><a href="${esc(a.url)}">${esc(a.domain)}</a></td><td>gravatar</td></tr>`);
+  $(el).innerHTML=`
+  <div class="card"><h2>SUBJECT — ${esc(P.name||S.picked.handle)}<span class="cnt">@${esc(P.login)}</span></h2>
+    ${D.avatar?`<img class="avatar-lg" src="${D.avatar}">`:''}
+    <div class="kv"><b>HANDLE</b><span>${esc(P.login)}</span><b>NAME</b><span>${esc(P.name||'—')}</span></div>
+    <div class="kv" style="margin-top:4px"><b>LOCATION</b><span>${esc(P.loc||'—')}</span><b>BIO</b><span>${esc((P.bio||'—').slice(0,80))}</span></div>
+    <div class="kv" style="margin-top:4px"><b>ON GITHUB SINCE</b><span>${esc(P.created)}</span><b>PUBLIC REPOS</b><span>${P.repos} · ${P.followers} followers</span></div>
+    <div class="tags"><span class="tag ok">picked via ${esc(S.picked.code||'')}</span><span class="tag">${esc(S.stage)}</span></div>
+  </div>
+  <div class="card"><h2>DOSSIER — ARTIFACTS<span class="cnt">${D.emails.length} emails · ${Object.values(D.subdomains||{}).flat().length} hosts</span></h2>
+  <table><thead><tr><th>CLASS</th><th>ARTIFACT</th><th>META</th><th>DATE</th><th>SOURCE</th></tr></thead><tbody>${rows||'<tr><td colspan=5 style="color:var(--faint)">none</td></tr>'}</tbody></table></div>
+  <div class="card"><h2>RAW LAYER JSON</h2><pre style="font-size:10px;color:#8a8a8a;white-space:pre-wrap;max-height:180px;overflow:auto">${esc(JSON.stringify({emails:D.emails,domains:D.domains,subdogs:undefined,subdomains:D.subdomains},null,1).slice(0,2500))}</pre></div>`;
+}
+function renderAll(){
+  hintsPaint();candPaint();telPaint();dossierPaint();navPaint();
+  $('#subject').value=S?.subject||'';
+}
+
+/* ============ actions ============ */
+function persist(){const all=store.all();const i=all.sessions.findIndex(s=>s.id===S.id);
+  if(i>=0)all.sessions[i]=S;else all.sessions.push(S);store.save(all);navPaint()}
+
+async function doFind(){
+  const subject=$('#subject').value.trim();if(!subject)return flash('enter subject');
+  S=S&&S.subject===subject?S:newSession(subject);S.subject=subject;S.stage='candidates';badge('SCANNING','warn');
+  $('#main').innerHTML=mainShell();hintsPaint();
+  try{const r=await findCandidates(subject,$('#depth').value);
+    S.candidates=r.candidates;S.telemetry=r.telemetry;S.netlog=NET.log;persist();renderAll();badge('CANDIDATES','ok');
+    flash(`${r.candidates.length} candidates — copy a P-code to the agent`);
+  }
+  catch(e){badge('ERROR','bad');$('#main').innerHTML=`<div id="empty">COLLECT ERROR ${esc(e.message)}</div>`}
+}
+function mainShell(){return`
+  <div class="card"><h2>CANDIDATES — PICK A CODE<span class="cnt">give the code to the agent</span></h2><div id="cands"></div>
+    <div style="margin-top:8px;font-size:11px;color:var(--dim)">reply in chat with a <code class="codechip">P##</code> to deep-dive, or NONE.</div></div>
+  <div class="card"><h2>REFINE — MORE ABOUT THE RIGHT PERSON</h2><div id="hints"></div></div>
+  <div class="card"><h2>TELEMETRY</h2><div id="telemetry"></div><div id="netlog"></div></div>
+  <div class="card"><h2>DOSSIER</h2><div id="dossier"><div id="empty">pick a candidate to deep-dive</div></div></div>`}
+
+$('#b-run').onclick=doFind;
+$('#b-none').onclick=()=>{if(!S)return flash('no session');S.stage='none-match';S.note='user: none of these';persist();renderAll();flash('marked none-match — tell the agent what you know')};
+$('#b-new').onclick=()=>{S=newSession('');S.stage='idle';$('#main').innerHTML='<div id="empty">new session — enter subject, FIND PEOPLE</div>';renderAll()};
+$('#b-save').onclick=()=>{if(!S)return flash('nothing');persist();flash('saved')};
+$('#b-del').onclick=()=>{if(!S)return;const all=store.all();all.sessions=all.sessions.filter(x=>x.id!==S.id);store.save(all);S=null;$('#main').innerHTML='<div id="empty">deleted.</div>';navPaint()};
+$('#b-export').onclick=()=>{if(!S)return flash('nothing');const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='osint-'+S.id+'.json';a.click()};
+
+/* restore last or idle */
+(function boot(){
+  const all=store.all().sessions;
+  if(all.length){S=structuredClone(all[all.length-1]);renderAll()}else{S=null;navPaint()}
 })();
 </script>
 </body>
