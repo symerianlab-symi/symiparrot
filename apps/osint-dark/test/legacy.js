@@ -1,0 +1,12 @@
+const R={};
+await loadPeople();
+const row=[...document.querySelectorAll('#people .person')].find(e=>e.dataset.k==='ZZ Legacy');
+R.found=!!row;
+row.click(); await new Promise(r=>setTimeout(r,300));
+R.sections=[...document.querySelectorAll('#profile-body .card h2')].map(h=>h.textContent.replace(/\s+/g,' ').trim());
+R.name=document.querySelector('.pname')?.textContent;
+R.dossierLen=document.getElementById('agentdossier')?.textContent.length;
+R.mdBlocks=document.querySelectorAll('#agentdossier .md-h1,#agentdossier .md-h2').length;
+R.rawPresent=document.getElementById('artifacts')?.textContent.includes('legacy raw blob');
+R.noCrash=getComputedStyle(document.getElementById('view-profile')).display;
+return JSON.stringify(R,null,1);

@@ -46,16 +46,84 @@ both directly and behind the Tailscale `serve` path proxy.
 ```sh
 curl -s -X POST http://127.0.0.1:18790/api/dossiers \
   -H 'Content-Type: application/json' \
-  -d '{"subject":"Jane Doe","dossier":{
-        "title":"Jane Doe — Role, Org",
-        "when":"2026-11-09",
-        "text":"# OSINT DOSSIER\n\n## VERDICT\n…markdown…",
-        "raw":"source trail / evidence"}}'
+  -d '{"subject":"Jane Doe","dossier":{ …see schema below… }}'
 ```
 
-`text` is rendered as markdown (headings, bold, inline code, links, lists).
-`raw` is shown verbatim under ARTIFACTS. Any image URLs found in either are
-rendered in the IMAGES card.
+The profile page renders a **structured schema**. Every field is optional — a
+dossier with only `title`/`when`/`text`/`raw` still renders (legacy fallback),
+it just shows fewer sections.
+
+```jsonc
+{
+  "title": "Jane Doe — Role, Org",       // roster label
+  "when": "2026-11-09",
+  "confidence": "high",                   // high | medium | low
+  "confidence_basis": "why this rating",
+  "summary": "one-line verdict shown under the header",
+  "role": "Founder & CEO",
+  "org": "ACME",
+  "location": "Dallas, TX",
+
+  "identity": {
+    "full_name": "Jane Doe",
+    "aliases": ["J. Doe"],
+    "handles": [{"platform":"linkedin","handle":"janedoe","url":"https://…","confidence":"high"}],
+    "dob": null, "nationality": null, "photo": null
+  },
+
+  "contact": {
+    "emails":    [{"value":"jane@acme.com","type":"work","confidence":"high","source":"acme.com","note":""}],
+    "phones":    [{"value":"+1 555 0100","type":"mobile","confidence":"low","source":"hint","note":""}],
+    "addresses": [{"value":"Dallas, TX 75206","type":"HQ","confidence":"high","source":"terms"}]
+  },
+
+  "employment": [{"org":"ACME","role":"CEO","start":"","end":"present","confidence":"high","source":"…"}],
+
+  "digital": {
+    "accounts": [{"platform":"linkedin","handle":"janedoe","url":"https://…","confidence":"high"}],
+    "domains":  [{"domain":"acme.com","mx":"Microsoft 365","hosting":"Azure","subdomains":65,"confidence":"high"}],
+    "repos":    [{"name":"acme-api","url":"https://…","lang":"Go"}]
+  },
+
+  "associates": [{"name":"John Roe","role":"CTO","relation":"co-founder","confidence":"high","link":"https://…"}],
+
+  "timeline": [{"date":"2026-11-09","event":"what happened","source":"where"}],
+  "evidence": [{"claim":"…","source":"…","url":"…","confidence":"high","type":"primary"}],
+  "gaps":     ["no date of birth", "no direct email"],
+
+  "text": "# OSINT DOSSIER\n\n## VERDICT\n…markdown narrative…",
+  "raw":  "source trail / evidence blob"
+}
+```
+
+Rendering rules:
+
+| Field | Where it appears |
+|---|---|
+| `summary` | under the profile header |
+| `identity`, `contact`, `employment`, `digital`, `associates` | their own cards, one row per entry |
+| `timeline` | vertical timeline with red event dots |
+| `evidence` | EVIDENCE card, one row per claim |
+| `gaps` | OPEN GAPS card and the CONFIDENCE card |
+| `text` | AGENT DOSSIER card, rendered as markdown |
+| `raw` | RAW LAYER card, verbatim |
+
+**Clickable rows.** Any row carrying extra detail expands in place to show it —
+handles, emails, phones, addresses, employment, domains, associates, and every
+evidence row. Emails and phones get a COPY button; associates with a `link`
+that matches another published subject get an OPEN DOSSIER button; evidence
+rows with a `url` get an "open source" link. The confidence chip in the header
+expands to show `confidence_basis`. RAW JSON is behind a toggle.
+
+Any image URLs found in `text` or `raw` are rendered in an IMAGES card.
+
+### Colour discipline
+
+Red (`#e5484d`) is **structural only** — borders, accent bars, dots, the ghost
+mark, the redline sweep, active states, and the code chips' borders. It is
+never used for body text, headings, or links, because red-on-dark is hard to
+read. Body text is `#c2c2c8`, headings `#e9e9ee`, links `#d4d4da` with a faint
+underline that turns red on hover.
 
 ## Configuration
 
