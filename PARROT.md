@@ -50,6 +50,31 @@ Branch `symi-parrot`. Fork of stock `@symerian/symi` 2026.12.87
   and does not load agent presets — use web/cli sessions for preset proofs
 - `symiparrot --profile headless "<task>"` = one-shot verification vehicle
 
+### tmux wheel scrolling (required for the CLI)
+The CLI runs in the alternate screen and enables DECSET 1007, but it does **not**
+enable mouse tracking — it scrolls on Up/Down/PageUp/PageDown. tmux 3.7's default
+`WheelUpPane` forwards the wheel to the app as a mouse event whenever
+`alternate_on` is set, and `WheelDownPane` is not bound at all. So wheel-up was
+swallowed and wheel-down did nothing.
+
+Fix lives in `~/.config/tmux/tmux.conf` (see `ops/tmux-scroll.conf`). Route by
+capability instead of by screen mode:
+
+```
+bind -n WheelUpPane   if -F -t = "#{mouse_any_flag}" "send-keys -M" "if -F -t = '#{alternate_on}' 'send-keys -t = Up Up Up' 'copy-mode -e'"
+bind -n WheelDownPane if -F -t = "#{mouse_any_flag}" "send-keys -M" "if -F -t = '#{alternate_on}' 'send-keys -t = Down Down Down' 'copy-mode -e'"
+bind -n S-WheelUpPane   copy-mode -e
+bind -n S-WheelDownPane copy-mode -e
+```
+
+1. app requested mouse tracking → forward the event (vim, less, htop)
+2. app is in alternate screen → send arrow keys (Symi, pagers)
+3. otherwise → tmux copy-mode (normal shell scrollback)
+
+Shift+wheel always reaches tmux scrollback, even inside a full-screen app.
+Verified: Symi pane resolves to SEND-ARROWS and scrolls; a plain shell resolves
+to copy-mode; a mouse-tracking app resolves to FORWARD-MOUSE.
+
 ## Credentials & keys (C1–C3 closure)
 - `parrot-home/.credentials.yaml` — layer-2 store, schema-valid (parser-proven),
   hot-reloaded; currently zero entries = search providers degrade with teaching errors
